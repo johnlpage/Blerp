@@ -1,0 +1,27 @@
+.game {
+    background-color: white;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+}
+
+body {
+    overflow: hidden;
+    margin: 0;
+    font-family:monospace;
+}
+
+.field {
+    position: absolute;
+    background-color: #00ed64;
+    padding: 1em;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+
+}
+
+.fieldlist {
+    width: calc(100vw-10px);
+    height: 100px;
+    margin: 5px 5px 5px 5px;
+    border: 1px solid black;
+}
