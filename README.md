@@ -13,9 +13,11 @@ Can create indexes
 TODO
 ----------
 
+~~~Delete Collection~~
+~~Delete Field~~
+
 Replace ID
-Delete Collection
-Delete Field
 Support Arrays (UX?)
+Popups
 Move Collection?
 
