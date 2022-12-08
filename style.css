@@ -9,7 +9,7 @@ body {
     overflow: hidden;
     margin: 0;
 
-    font-size: min(3vw, 16pt);
+    font-size: min(3vw, 24pt);
     -webkit-user-select: none;
     /* Safari */
     -ms-user-select: none;
