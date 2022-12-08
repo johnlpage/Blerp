@@ -20,7 +20,7 @@ function messageBubble (prompt) {
   newMsg.style.top = y + 'vh'
   newMsg.style.left = x + 'vw'
   newMsg.style.width = `calc(${w}vw - 2em)`
-  newMsg.style.height = `calc(${h}vh - 2em)`
+  // newMsg.style.height = `calc(${h}vh - 2em)`
   const closeButton = document.createElement('div')
   closeButton.className = 'deletebutton'
   closeButton.append(document.createTextNode('X'))
