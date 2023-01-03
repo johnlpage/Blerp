@@ -1,11 +1,11 @@
 let dragOffsetX, dragOffsetY
 let tempElement, tempX, tempY
 const collections = []
-const fields = []
+let fields = []
 let elno = 1000
 
 const levels = []
-const currentLevel = 0
+let currentLevel = 0
 
 let idElement
 
@@ -28,6 +28,26 @@ function messageBubble (prompt) {
   document.body.appendChild(newMsg)
 }
 
+// eslint-disable-next-line no-unused-vars
+function testSchema () {
+  clearSchema()
+  currentLevel++
+  for (let i = 0; i < fields.length; i++) {
+    fields[i].remove()
+  }
+  fields = []
+  startLevel(levels[currentLevel])
+}
+
+// eslint-disable-next-line no-unused-vars
+function clearSchema () {
+  console.log('clear')
+  for (let idx = 0; idx < collections.length; idx++) {
+    deleteField(collections[idx].id)
+  }
+  console.log(JSON.stringify(collections, null, 2))
+}
+
 function closeMessage (ev) {
   ev.target.parentElement.remove()
   tutorial(levels[currentLevel]) // Show next
@@ -42,10 +62,19 @@ function createLevels () {
     close this message using the button at the top right`
     },
     { x: 10, y: 6, w: 40, h: 12, msg: 'Drag this _id field to the space below to create a new collection, then click "Test"' }],
-    fields:  ['_id: ObjectId()', 'OrderId', 'CustomerId', 'Item', 'Quantity', 'Address','Name','Email'],
+    fields: ['_id: ObjectId()', 'OrderId', 'CustomerId', 'Item', 'Quantity', 'Address', 'Name', 'Email'],
     ops: []
   }
+
+  const leveltwo = {
+    prompts: [
+      { x: 10, y: 6, w: 40, h: 12, msg: 'This is another level' }],
+    fields: ['_id: ObjectId()', 'Two', 'Three', 'Four'],
+    ops: []
+  }
+
   levels.push(levelone)
+  levels.push(leveltwo) // Testing
 }
 
 function tutorial (level) {
@@ -57,20 +86,21 @@ function tutorial (level) {
 
 function startLevel (level) {
   let x = 10
-  tutorial(level)
+
   for (const label of level.fields) {
     const newEl = newElement(x, 10, label, true)
     if (label === level.fields[0]) newEl.draggable = true
     x = x + newEl.clientWidth + 10
     fields.push(newEl)
   }
+  idElement = fields[0]
+  tutorial(level)
 }
 
 // eslint-disable-next-line no-unused-vars
 function onLoad () {
   createLevels()
   startLevel(levels[currentLevel])
-  idElement = fields[0]
   document.addEventListener('dragover', function (e) { e.preventDefault() })
 }
 
@@ -78,11 +108,12 @@ function dragEnd (dropX, dropY, text, isId) {
   // We can drop _id anywhere, others only on an existing schema
   if (isId) {
     const el = newElement(dropX, dropY, text, false, true)
-    collections.push({ id: el.id, cX: dropX, cY: dropY, fields: ['_id'], elements: [el.id] })
+    collections.push({ id: el.id, cX: dropX, cY: dropY, arrays:[], fields: ['_id'], elements: [el.id] })
     collections.sort((a, b) => { return b.cY - a.cY })
     // Make everything draggable now
     for (const f of fields) { f.draggable = true };
   } else {
+    console.log('Not ID')
     // Can only drop a non _id field under a collection
     for (const collection of collections) {
       const idX = collection.cX
@@ -97,6 +128,16 @@ function dragEnd (dropX, dropY, text, isId) {
           collection.fields.push(text)
           const fieldEl = newElement(dropX, dropY, text, false, true)
           collection.elements.push(fieldEl.id)
+        } else {
+          // Dropping twice makes this an array
+          console.log('Make Array')
+          if (collection.arrays.includes(text) === false) {
+            collection.arrays.push(text)
+            // Update the element to show it's an array
+            const idx = collection.fields.indexOf(text)
+            const fnameel = document.getElementById(collection.elements[idx])
+            fnameel.childNodes[1].textContent = `Array(${text})`
+          }
         }
         break
       }
@@ -128,6 +169,7 @@ function browserDragEnd (ev) {
   const dropX = ev.clientX - dragOffsetX
   const dropY = ev.clientY - dragOffsetY
   const isId = (ev.target === idElement)
+
   dragEnd(dropX, dropY, text, isId)
 }
 
@@ -179,6 +221,10 @@ function mobileDrag (ev) {
 function deleteBoardItem (ev) {
   const fieldId = ev.target.parentElement.id
   console.log(fieldId)
+  return deleteField(fieldId)
+}
+
+function deleteField (fieldId) {
   // Check if we are deleting a whole collection
 
   for (let idx = 0; idx < collections.length; idx++) {
@@ -205,12 +251,9 @@ function deleteBoardItem (ev) {
       const height = elToRemove.clientHeight
       elToRemove.remove()
       // Shuffle the elements below up
-      console.log(elidx)
       for (let e = elidx; e < collections[idx].elements.length; e++) {
         console.log(collections[idx].elements[e])
         const elToMove = document.getElementById(collections[idx].elements[e])
-        console.log(height)
-        console.log(elToMove)
         elToMove.style.top = (elToMove.style.top.replace('px', '') - height) + 'px'
       }
       console.log(collections[idx])

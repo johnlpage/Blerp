@@ -41,7 +41,7 @@ Can create indexes
 
 TODO
 ----------
-Add the idea of 'Levels'
+~~Add the idea of 'Levels'~~
 
 ~~~Delete Collection~~
 ~~Delete Field~~
