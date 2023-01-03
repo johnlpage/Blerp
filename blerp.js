@@ -7,7 +7,6 @@ let elno = 1000
 const levels = []
 const currentLevel = 0
 
-const examples = ['_id: ObjectId()', 'Name', 'Number', 'Item', 'Quantity', 'Address']
 let idElement
 
 // Brings up a popup you must dismiss to continue
@@ -42,8 +41,8 @@ function createLevels () {
     If you drag a field onto the _id field you can change what value is used as the unique identifier</p>
     close this message using the button at the top right`
     },
-    { x: 10, y: 6, w: 40, h: 12, msg: 'Drag this _id field to the space below to create a new collection' }],
-    fields: ['_id: ObjectId()', 'Name', 'Number', 'Item', 'Quantity', 'Address'],
+    { x: 10, y: 6, w: 40, h: 12, msg: 'Drag this _id field to the space below to create a new collection, then click "Test"' }],
+    fields:  ['_id: ObjectId()', 'OrderId', 'CustomerId', 'Item', 'Quantity', 'Address','Name','Email'],
     ops: []
   }
   levels.push(levelone)
@@ -61,7 +60,7 @@ function startLevel (level) {
   tutorial(level)
   for (const label of level.fields) {
     const newEl = newElement(x, 10, label, true)
-    if (label === examples[0]) newEl.draggable = true
+    if (label === level.fields[0]) newEl.draggable = true
     x = x + newEl.clientWidth + 10
     fields.push(newEl)
   }
@@ -90,8 +89,8 @@ function dragEnd (dropX, dropY, text, isId) {
       const idY = collection.cY
 
       const fieldHeight = document.getElementById(collection.id).clientHeight
-
-      if (idY + fieldHeight < dropY && dropX > idX - 20 && dropX < idX + 80) {
+      // TODO - adjust these drop target areas
+      if (idY + fieldHeight < dropY && dropX > idX - 20 && dropX < idX + 100) {
         dropX = idX
         dropY = idY + (fieldHeight * collection.fields.length)
         if (collection.fields.includes(text) === false) {
