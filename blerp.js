@@ -6,11 +6,11 @@ let elno = 1000
 
 const levels = []
 let currentLevel = 0
-
+let dialogBackground
 let idElement
 
 // Brings up a popup you must dismiss to continue
-
+// We need to make these dialogs
 function messageBubble (prompt) {
   const { x, y, w, h, msg } = prompt
   const newMsg = document.createElement('div')
@@ -25,11 +25,15 @@ function messageBubble (prompt) {
   closeButton.append(document.createTextNode('X'))
   closeButton.addEventListener('click', closeMessage)
   newMsg.append(closeButton)
+  dialogBackground = document.createElement('div')
+  dialogBackground.className = 'dialogbackground'
+  document.body.appendChild(dialogBackground)
   document.body.appendChild(newMsg)
 }
 
 // eslint-disable-next-line no-unused-vars
 function testSchema () {
+  messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'This is where we tell you if you suceeded or not.' })
   clearSchema()
   currentLevel++
   for (let i = 0; i < fields.length; i++) {
@@ -50,10 +54,24 @@ function clearSchema () {
 
 function closeMessage (ev) {
   ev.target.parentElement.remove()
+  dialogBackground.remove()
   tutorial(levels[currentLevel]) // Show next
 }
 
 function createLevels () {
+  const tutorialone = {
+    prompts: [{
+      x: 5, y: 5, w: 90, h: 90, msg: `In this game you construct MongoDB schemas to meet performance targets.</p>
+      You are presented with a set of fields you can drag into collections. Each collection must have a field called _id
+      which is the unique identifier fo each Document (record)`
+    }, {
+      x: 5, y: 5, w: 90, h: 90, msg: 'By default MongoDB will add this field for you as type ObjectId(), an ordered GUID'
+    },
+    { x: 5, y: 5, w: 90, h: 90, msg: 'Drag the _id field to the space blow then click Test Schema' }],
+    fields: ['_id:ObjectId()']
+  }
+
+  levels.push(tutorialone)
   const levelone = {
     prompts: [{
       x: 5, y: 5, w: 90, h: 90, msg: `This is a bunch of text that describes what you have to do</p> 
@@ -79,7 +97,7 @@ function createLevels () {
 
 function tutorial (level) {
   if (level.prompt === undefined) { level.prompt = 0 };
-  if (level.prompt >= level.prompts.length) { return }
+  if (level.prompt >= level.prompts.length) {  return }
   messageBubble(level.prompts[level.prompt])
   level.prompt = level.prompt + 1
 }
@@ -108,7 +126,7 @@ function dragEnd (dropX, dropY, text, isId) {
   // We can drop _id anywhere, others only on an existing schema
   if (isId) {
     const el = newElement(dropX, dropY, text, false, true)
-    collections.push({ id: el.id, cX: dropX, cY: dropY, arrays:[], fields: ['_id'], elements: [el.id] })
+    collections.push({ id: el.id, cX: dropX, cY: dropY, arrays: [], fields: ['_id'], elements: [el.id] })
     collections.sort((a, b) => { return b.cY - a.cY })
     // Make everything draggable now
     for (const f of fields) { f.draggable = true };
@@ -121,7 +139,7 @@ function dragEnd (dropX, dropY, text, isId) {
 
       const fieldHeight = document.getElementById(collection.id).clientHeight
       // TODO - adjust these drop target areas
-      if (idY + fieldHeight < dropY && dropX > idX - 20 && dropX < idX + 100) {
+      if (idY + fieldHeight < dropY && dropX > idX - 20 && dropX < idX + 200) {
         dropX = idX
         dropY = idY + (fieldHeight * collection.fields.length)
         if (collection.fields.includes(text) === false) {
@@ -283,6 +301,7 @@ function newElement (x, y, label, inPallette, dropped) {
     newField.style.left = `${x}px`
     newField.style.top = `${y}px`
     const game = document.getElementById('game')
+    // TODO - Wrapper for a collection maybe
     game.appendChild(newField)
   } else {
     newField.className = 'pallette_field'
