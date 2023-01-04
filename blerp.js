@@ -9,6 +9,57 @@ let currentLevel = 0
 let dialogBackground
 let idElement
 
+function createLevels () {
+  const tutorialone = {
+    prompts: [{
+      x: 5, y: 40, w: 90, h: 90, msg: `In this game you construct MongoDB schemas to meet performance targets.</p>
+      You are presented with a set of fields you can drag into collections. Each collection must have a field called _id
+      which is the unique identifier for each document`
+    }, {
+      x: 5, y: 40, w: 90, h: 90, msg: 'By default MongoDB will set the value of the _id field for you as type ObjectId(). This a globally unique auto generated identifier.'
+    },
+    { x: 5, y: 40, w: 90, h: 90, msg: 'Drag the _id field to the space blow then click Test Schema' }],
+    fields: ['_id:ObjectId()']
+  }
+
+  levels.push(tutorialone)
+
+  const tutorialtwo = {
+    prompts: [{ x: 5, y: 40, w: 90, h: 90, msg: 'The _id field value is unique and always has an index to make it fast to retrieve by.' },
+      { x: 5, y: 40, w: 90, h: 12, msg: 'Instead of a random ObjectId() we can store our own unique keys in _id' },
+      { x: 5, y: 40, w: 90, h: 12, msg: 'Drag the _id field below then drag CustomerId on top to make a collection where CustomerId is the unique identifier then click "Test Schema"' }
+    ],
+    fields: ['_id: ObjectId()', 'CustomerID']
+  }
+  levels.push(tutorialtwo)
+
+  const tutorialthree = {
+    prompts: [{ x: 5, y: 40, w: 90, h: 90, msg: 'A collection with only primary key is seldom useful, lets create a colection with multiple fields.' },
+      { x: 5, y: 40, w: 90, h: 12, msg: 'Drag the _id field down then the other fields underneath it one at a time to create a collection with multiple fields' }],
+    fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
+  }
+  levels.push(tutorialthree)
+
+  const tutorialfour = {
+    prompts: [{ x: 5, y: 40, w: 90, h: 90, msg: 'We can create multiple collections to model our data, Just drag _id down again to start a second colleciton' },
+      { x: 5, y: 40, w: 90, h: 12, msg: 'A Customer may have muliple phone numbers, create two collections one for the customer and one for their phone numbers' },
+      { x: 5, y: 40, w: 90, h: 12, msg: 'If both contain CustomerId then we will be able to fetch all details for a given customer' }],
+    fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
+  }
+  levels.push(tutorialfour)
+
+  const tutorialfive = {
+    prompts: [{
+      x: 5, y: 40, w: 90, h: 90, msg: 'Modeling a one to many relationship Customer->Phone like this means reading data from multiple places.'
+    },
+    { x: 5, y: 40, w: 90, h: 12, msg: 'This is less efficient both when reading and as a developer understanding the model' },
+    { x: 5, y: 40, w: 90, h: 12, msg: 'Document databases allow you to store multiple related values for the same field inside the same record' },
+    { x: 5, y: 40, w: 90, h: 12, msg: 'Drag Name and PhoneNUmber into the same colleciton, then Drag Phone NUmber again on top of itself to create an Array of numbers' }],
+    fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
+  }
+  levels.push(tutorialfive)
+}
+
 // Brings up a popup you must dismiss to continue
 // We need to make these dialogs
 function messageBubble (prompt, cb) {
@@ -34,7 +85,7 @@ function messageBubble (prompt, cb) {
 // eslint-disable-next-line no-unused-vars
 function testSchema () {
   // TODO - Check if level passed
-  messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'This is where we tell you if you suceeded or not.' }, nextLevel)
+  messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'Well Done (p.s. It\'s not actually checking yet)' }, nextLevel)
 }
 
 function nextLevel () {
@@ -50,8 +101,9 @@ function nextLevel () {
 // eslint-disable-next-line no-unused-vars
 function clearSchema () {
   console.log('clear')
-  for (let idx = 0; idx < collections.length; idx++) {
-    deleteField(collections[idx].id)
+  // Reverse so things dont move
+  for (let idx = collections.length; idx > 0; idx--) {
+    deleteField(collections[idx - 1].id)
   }
   console.log(JSON.stringify(collections, null, 2))
 }
@@ -61,32 +113,6 @@ function closeMessage (ev, cb) {
   dialogBackground.remove()
   if (cb) { cb() }
   // tutorial(levels[currentLevel])
-}
-
-function createLevels () {
-  const tutorialone = {
-    prompts: [{
-      x: 5, y: 40, w: 90, h: 90, msg: `In this game you construct MongoDB schemas to meet performance targets.</p>
-      You are presented with a set of fields you can drag into collections. Each collection must have a field called _id
-      which is the unique identifier for each document`
-    }, {
-      x: 5, y: 40, w: 90, h: 90, msg: 'By default MongoDB will add the _id field for you as a value of type ObjectId(). This a globally unique identifier.'
-    },
-    { x: 5, y: 40, w: 90, h: 90, msg: 'Drag the _id field to the space blow then click Test Schema' }],
-    fields: ['_id:ObjectId()']
-  }
-
-  levels.push(tutorialone)
-  const levelone = {
-    prompts: [{
-      x: 5, y: 5, w: 90, h: 90, msg: 'This is level 2'
-    },
-    { x: 10, y: 6, w: 40, h: 12, msg: 'Drag everythign into one collection then click "Test"' }],
-    fields: ['_id: ObjectId()', 'OrderId', 'CustomerId', 'Item', 'Quantity', 'Address', 'Name', 'Email'],
-    ops: []
-  }
-
-  levels.push(levelone)
 }
 
 function tutorial (level) {
