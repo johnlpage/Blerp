@@ -88,9 +88,17 @@ function testSchema () {
   messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'Well Done (p.s. It\'s not actually checking yet)' }, nextLevel)
 }
 
+// eslint-disable-next-line no-unused-vars
+function restartLevel() {
+  console.log('restart')
+  currentLevel--
+  nextLevel()
+}
+
 function nextLevel () {
   clearSchema()
   currentLevel++
+
   for (let i = 0; i < fields.length; i++) {
     fields[i].remove()
   }
@@ -100,7 +108,7 @@ function nextLevel () {
 
 // eslint-disable-next-line no-unused-vars
 function clearSchema () {
-  console.log('clear')
+
   // Reverse so things dont move
   for (let idx = collections.length; idx > 0; idx--) {
     deleteField(collections[idx - 1].id)
@@ -112,7 +120,6 @@ function closeMessage (ev, cb) {
   ev.target.parentElement.remove()
   dialogBackground.remove()
   if (cb) { cb() }
-  // tutorial(levels[currentLevel])
 }
 
 function tutorial (level) {
@@ -124,7 +131,7 @@ function tutorial (level) {
 
 function startLevel (level) {
   let x = 10
-
+  console.log(`Starting Level ${currentLevel}`)
   for (const label of level.fields) {
     const newEl = newElement(x, 10, label, true)
     if (label === level.fields[0]) newEl.draggable = true
@@ -132,6 +139,7 @@ function startLevel (level) {
     fields.push(newEl)
   }
   idElement = fields[0]
+  level.prompt = 0
   tutorial(level)
 }
 
