@@ -34,7 +34,7 @@ function createLevels () {
   levels.push(tutorialtwo)
 
   const tutorialthree = {
-    prompts: [{ x: 5, y: 40, w: 90, h: 90, msg: 'A collection with only primary key is seldom useful, lets create a colection with multiple fields.' },
+    prompts: [{ x: 5, y: 40, w: 90, h: 90, msg: 'A collection with only primary key is seldom useful, lets create a collection with multiple fields.' },
       { x: 5, y: 40, w: 90, h: 12, msg: 'Drag the _id field down then the other fields underneath it one at a time to create a collection with multiple fields' }],
     fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
   }
