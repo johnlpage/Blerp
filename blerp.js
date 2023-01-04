@@ -11,7 +11,7 @@ let idElement
 
 // Brings up a popup you must dismiss to continue
 // We need to make these dialogs
-function messageBubble (prompt) {
+function messageBubble (prompt, cb) {
   const { x, y, w, h, msg } = prompt
   const newMsg = document.createElement('div')
   newMsg.innerHTML = msg
@@ -23,7 +23,7 @@ function messageBubble (prompt) {
   const closeButton = document.createElement('div')
   closeButton.className = 'deletebutton'
   closeButton.append(document.createTextNode('X'))
-  closeButton.addEventListener('click', closeMessage)
+  closeButton.addEventListener('click', (ev) => { closeMessage(ev, cb) })
   newMsg.append(closeButton)
   dialogBackground = document.createElement('div')
   dialogBackground.className = 'dialogbackground'
@@ -33,7 +33,11 @@ function messageBubble (prompt) {
 
 // eslint-disable-next-line no-unused-vars
 function testSchema () {
-  messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'This is where we tell you if you suceeded or not.' })
+  // TODO - Check if level passed
+  messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'This is where we tell you if you suceeded or not.' }, nextLevel)
+}
+
+function nextLevel () {
   clearSchema()
   currentLevel++
   for (let i = 0; i < fields.length; i++) {
@@ -52,53 +56,43 @@ function clearSchema () {
   console.log(JSON.stringify(collections, null, 2))
 }
 
-function closeMessage (ev) {
+function closeMessage (ev, cb) {
   ev.target.parentElement.remove()
   dialogBackground.remove()
-  tutorial(levels[currentLevel]) // Show next
+  if (cb) { cb() }
+  // tutorial(levels[currentLevel])
 }
 
 function createLevels () {
   const tutorialone = {
     prompts: [{
-      x: 5, y: 5, w: 90, h: 90, msg: `In this game you construct MongoDB schemas to meet performance targets.</p>
+      x: 5, y: 40, w: 90, h: 90, msg: `In this game you construct MongoDB schemas to meet performance targets.</p>
       You are presented with a set of fields you can drag into collections. Each collection must have a field called _id
-      which is the unique identifier fo each Document (record)`
+      which is the unique identifier for each document`
     }, {
-      x: 5, y: 5, w: 90, h: 90, msg: 'By default MongoDB will add this field for you as type ObjectId(), an ordered GUID'
+      x: 5, y: 40, w: 90, h: 90, msg: 'By default MongoDB will add the _id field for you as a value of type ObjectId(). This a globally unique identifier.'
     },
-    { x: 5, y: 5, w: 90, h: 90, msg: 'Drag the _id field to the space blow then click Test Schema' }],
+    { x: 5, y: 40, w: 90, h: 90, msg: 'Drag the _id field to the space blow then click Test Schema' }],
     fields: ['_id:ObjectId()']
   }
 
   levels.push(tutorialone)
   const levelone = {
     prompts: [{
-      x: 5, y: 5, w: 90, h: 90, msg: `This is a bunch of text that describes what you have to do</p> 
-    In this first level drag the _id field to start a new collection then fields under it.</p>
-    If you drag a field onto the _id field you can change what value is used as the unique identifier</p>
-    close this message using the button at the top right`
+      x: 5, y: 5, w: 90, h: 90, msg: 'This is level 2'
     },
-    { x: 10, y: 6, w: 40, h: 12, msg: 'Drag this _id field to the space below to create a new collection, then click "Test"' }],
+    { x: 10, y: 6, w: 40, h: 12, msg: 'Drag everythign into one collection then click "Test"' }],
     fields: ['_id: ObjectId()', 'OrderId', 'CustomerId', 'Item', 'Quantity', 'Address', 'Name', 'Email'],
     ops: []
   }
 
-  const leveltwo = {
-    prompts: [
-      { x: 10, y: 6, w: 40, h: 12, msg: 'This is another level' }],
-    fields: ['_id: ObjectId()', 'Two', 'Three', 'Four'],
-    ops: []
-  }
-
   levels.push(levelone)
-  levels.push(leveltwo) // Testing
 }
 
 function tutorial (level) {
   if (level.prompt === undefined) { level.prompt = 0 };
-  if (level.prompt >= level.prompts.length) {  return }
-  messageBubble(level.prompts[level.prompt])
+  if (level.prompt >= level.prompts.length) { return }
+  messageBubble(level.prompts[level.prompt], () => { tutorial(level) })
   level.prompt = level.prompt + 1
 }
 
