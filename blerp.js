@@ -52,9 +52,9 @@ function createLevels () {
     prompts: [{
       x: 5, y: 40, w: 90, h: 90, msg: 'Modeling a one to many relationship Customer->Phone like this means reading data from multiple places.'
     },
-    { x: 5, y: 40, w: 90, h: 12, msg: 'This is less efficient both when reading and as a developer understanding the model' },
+    { x: 5, y: 40, w: 90, h: 12, msg: 'This is less efficient when reading from the databasde' },
     { x: 5, y: 40, w: 90, h: 12, msg: 'Document databases allow you to store multiple related values for the same field inside the same record' },
-    { x: 5, y: 40, w: 90, h: 12, msg: 'Drag Name and PhoneNUmber into the same colleciton, then Drag Phone NUmber again on top of itself to create an Array of numbers' }],
+    { x: 5, y: 40, w: 90, h: 12, msg: 'Drag Name and PhoneNumber into the same colleciton, then drag PhoneNumber <b>again</b> on top of itself to create an array of numbers' }],
     fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
   }
   levels.push(tutorialfive)
