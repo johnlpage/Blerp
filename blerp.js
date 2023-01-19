@@ -5,56 +5,64 @@ let fields = []
 let elno = 1000
 
 const levels = []
-let currentLevel = 0
-let dialogBackground
+let currentLevelNo = 0
 let idElement
 
 function createLevels () {
+  // Using this to create engine test levels
+  const testLevel = {
+    intro: [/* None */],
+    fields: ['_id: ObjectId()', 'CustomerId', 'Name'],
+    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { Name: 1, CustomerId: 1 }, target: 3800 }]
+  }
+
+  levels.push(testLevel)
+
   const tutorialone = {
-    prompts: [{
-      x: 5, y: 40, w: 90, h: 90, msg: `In this game you construct MongoDB schemas to meet performance targets.</p>
+    intro: [{
+      msg: `In this game you construct MongoDB schemas to meet performance targets.</p>
       You are presented with a set of fields you can drag into collections. Each collection must have a field called _id
       which is the unique identifier for each document`
-    }, {
-      x: 5, y: 40, w: 90, h: 90, msg: 'By default MongoDB will set the value of the _id field for you as type ObjectId(). This a globally unique auto generated identifier.'
-    },
-    { x: 5, y: 40, w: 90, h: 90, msg: 'Drag the _id field to the space blow then click Test Schema' }],
-    fields: ['_id:ObjectId()']
+    }, { msg: 'By default MongoDB will set the value of the _id field for you as type ObjectId(). This a globally unique auto generated identifier.' },
+    { msg: 'Drag the _id field to the space blow then click Test Schema' }],
+    fields: ['_id:ObjectId()'],
+    tests: []
   }
 
   levels.push(tutorialone)
 
   const tutorialtwo = {
-    prompts: [{ x: 5, y: 40, w: 90, h: 90, msg: 'The _id field value is unique and always has an index to make it fast to retrieve by.' },
-      { x: 5, y: 40, w: 90, h: 12, msg: 'Instead of a random ObjectId() we can store our own unique keys in _id' },
-      { x: 5, y: 40, w: 90, h: 12, msg: 'Drag the _id field below then drag CustomerId on top to make a collection where CustomerId is the unique identifier then click "Test Schema"' }
+    intro: [{ x: 5, y: 40, w: 90, h: 90, msg: 'The _id field value is unique and always has an index to make it fast to retrieve by.' },
+      { msg: 'Instead of a random ObjectId() we can store our own unique keys in _id' },
+      { msg: 'Drag the _id field below then drag CustomerId on top to make a collection where CustomerId is the unique identifier then click "Test Schema"' }
     ],
-    fields: ['_id: ObjectId()', 'CustomerID']
+    fields: ['_id: ObjectId()', 'CustomerID'],
+    tests: []
   }
   levels.push(tutorialtwo)
 
   const tutorialthree = {
-    prompts: [{ x: 5, y: 40, w: 90, h: 90, msg: 'A collection with only primary key is seldom useful, lets create a collection with multiple fields.' },
-      { x: 5, y: 40, w: 90, h: 12, msg: 'Drag the _id field down then the other fields underneath it one at a time to create a collection with multiple fields' }],
+    intro: [{ x: 5, y: 40, w: 90, h: 90, msg: 'A collection with only primary key is seldom useful, lets create a collection with multiple fields.' },
+      { msg: 'Drag the _id field down then the other fields underneath it one at a time to create a collection with multiple fields' }],
     fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
   }
   levels.push(tutorialthree)
 
   const tutorialfour = {
-    prompts: [{ x: 5, y: 40, w: 90, h: 90, msg: 'We can create multiple collections to model our data, Just drag _id down again to start a second colleciton' },
-      { x: 5, y: 40, w: 90, h: 12, msg: 'A Customer may have muliple phone numbers, create two collections one for the customer and one for their phone numbers' },
-      { x: 5, y: 40, w: 90, h: 12, msg: 'If both contain CustomerId then we will be able to fetch all details for a given customer' }],
+    intro: [{ x: 5, y: 40, w: 90, h: 90, msg: 'We can create multiple collections to model our data, Just drag _id down again to start a second colleciton' },
+      { msg: 'A Customer may have muliple phone numbers, create two collections one for the customer and one for their phone numbers' },
+      { msg: 'If both contain CustomerId then we will be able to fetch all details for a given customer' }],
     fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
   }
   levels.push(tutorialfour)
 
   const tutorialfive = {
-    prompts: [{
+    intro: [{
       x: 5, y: 40, w: 90, h: 90, msg: 'Modeling a one to many relationship Customer->Phone like this means reading data from multiple places.'
     },
-    { x: 5, y: 40, w: 90, h: 12, msg: 'This is less efficient when reading from the databasde' },
-    { x: 5, y: 40, w: 90, h: 12, msg: 'Document databases allow you to store multiple related values for the same field inside the same record' },
-    { x: 5, y: 40, w: 90, h: 12, msg: 'Drag Name and PhoneNumber into the same colleciton, then drag PhoneNumber <b>again</b> on top of itself to create an array of numbers' }],
+    { msg: 'This is less efficient when reading from the databasde' },
+    { msg: 'Document databases allow you to store multiple related values for the same field inside the same record' },
+    { msg: 'Drag Name and PhoneNumber into the same colleciton, then drag PhoneNumber <b>again</b> on top of itself to create an array of numbers' }],
     fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
   }
   levels.push(tutorialfive)
@@ -63,7 +71,12 @@ function createLevels () {
 // Brings up a popup you must dismiss to continue
 // We need to make these dialogs
 function messageBubble (prompt, cb) {
-  const { x, y, w, h, msg } = prompt
+  let { x, y, w, h, msg } = prompt
+  if (x === undefined) x = 5
+  if (y === undefined) y = 40
+  if (w === undefined) w = 90
+  if (h === undefined) h = 12
+
   const newMsg = document.createElement('div')
   newMsg.innerHTML = msg
   newMsg.className = 'messagebubble'
@@ -76,39 +89,57 @@ function messageBubble (prompt, cb) {
   closeButton.append(document.createTextNode('X'))
   closeButton.addEventListener('click', (ev) => { closeMessage(ev, cb) })
   newMsg.append(closeButton)
-  dialogBackground = document.createElement('div')
-  dialogBackground.className = 'dialogbackground'
-  document.body.appendChild(dialogBackground)
   document.body.appendChild(newMsg)
+  document.getElementById('dialogbackground').style.display = 'inline'
 }
 
 // eslint-disable-next-line no-unused-vars
-function testSchema () {
+async function testSchema () {
   // TODO - Check if level passed
-  messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'Well Done (p.s. It\'s not actually checking yet)' }, nextLevel)
+  console.log('Check Schema')
+  const { tests } = levels[currentLevelNo]
+  for (const test of tests) {
+    // eslint-disable-next-line no-undef
+    const testOutcome = perfTest(test, collections)
+    console.log(testOutcome)
+    if (testOutcome.ok === false) {
+      /* We cannot use this schema at all */
+      messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: testOutcome.msg }, restartLevel)
+      return
+    } else {
+      // Show the performance
+      // eslint-disable-next-line no-undef
+      await new Promise((resolve) => { simulateOp(testOutcome, resolve) })
+      // And fail if we have to
+      if (testOutcome.performance < testOutcome.target) {
+        messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'Sorry but that\'s not fast enough' }, restartLevel)
+        return
+      }
+    }
+  }
+
+  messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'Well Done - but retrying anyway for testing' }, restartLevel)
 }
 
 // eslint-disable-next-line no-unused-vars
-function restartLevel() {
+function restartLevel () {
   console.log('restart')
-  currentLevel--
-  nextLevel()
+  currentLevelNo--
+  startNextLevel()
 }
 
-function nextLevel () {
+function startNextLevel () {
   clearSchema()
-  currentLevel++
-
+  currentLevelNo++
   for (let i = 0; i < fields.length; i++) {
     fields[i].remove()
   }
   fields = []
-  startLevel(levels[currentLevel])
+  startLevel(levels[currentLevelNo])
 }
 
 // eslint-disable-next-line no-unused-vars
 function clearSchema () {
-
   // Reverse so things dont move
   for (let idx = collections.length; idx > 0; idx--) {
     deleteField(collections[idx - 1].id)
@@ -118,20 +149,20 @@ function clearSchema () {
 
 function closeMessage (ev, cb) {
   ev.target.parentElement.remove()
-  dialogBackground.remove()
+  document.getElementById('dialogbackground').style.display = 'none'
   if (cb) { cb() }
 }
 
 function tutorial (level) {
   if (level.prompt === undefined) { level.prompt = 0 };
-  if (level.prompt >= level.prompts.length) { return }
-  messageBubble(level.prompts[level.prompt], () => { tutorial(level) })
+  if (level.prompt >= level.intro.length) { return }
+  messageBubble(level.intro[level.prompt], () => { tutorial(level) })
   level.prompt = level.prompt + 1
 }
 
 function startLevel (level) {
   let x = 10
-  console.log(`Starting Level ${currentLevel}`)
+  console.log(`Starting Level ${currentLevelNo}`)
   for (const label of level.fields) {
     const newEl = newElement(x, 10, label, true)
     if (label === level.fields[0]) newEl.draggable = true
@@ -146,7 +177,7 @@ function startLevel (level) {
 // eslint-disable-next-line no-unused-vars
 function onLoad () {
   createLevels()
-  startLevel(levels[currentLevel])
+  startLevel(levels[currentLevelNo])
   document.addEventListener('dragover', function (e) { e.preventDefault() })
 }
 
