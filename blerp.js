@@ -11,7 +11,7 @@ let idElement
 function createLevels () {
   // Using this to create engine test levels
   const testLevel = {
-    intro: [/* None */],
+    intro: [{ msg: 'Create a Schema to retrieve Customer Names by CustomerID' }],
     fields: ['_id: ObjectId()', 'CustomerId', 'Name'],
     tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { Name: 1, CustomerId: 1 }, target: 3800 }]
   }
