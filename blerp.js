@@ -8,16 +8,8 @@ const levels = []
 let currentLevelNo = 0
 let idElement
 
-function createLevels () {
-  // Using this to create engine test levels
-  const testLevel = {
-    intro: [{ msg: 'Create a Schema to retrieve Customer Names by CustomerID' }],
-    fields: ['_id: ObjectId()', 'CustomerId', 'Name'],
-    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { Name: 1, CustomerId: 1 }, target: 3800 }]
-  }
-
-  levels.push(testLevel)
-
+function tutorialLevels()
+{
   const tutorialone = {
     intro: [{
       msg: `In this game you construct MongoDB schemas to meet performance targets.</p>
@@ -66,6 +58,22 @@ function createLevels () {
     fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
   }
   levels.push(tutorialfive)
+}
+
+function createLevels () {
+
+  tutorialLevels()
+  
+  // Using this to create engine test levels
+  const testLevel = {
+    intro: [{ msg: 'Create a Schema to retrieve Customer Names by CustomerID' }],
+    fields: ['_id: ObjectId()', 'CustomerId', 'Name'],
+    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { Name: 1, CustomerId: 1 }, target: 3800 }]
+  }
+
+  levels.push(testLevel)
+
+ 
 }
 
 // Brings up a popup you must dismiss to continue
