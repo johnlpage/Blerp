@@ -7,7 +7,8 @@
     <meta http-equiv="Expires" content="0" />
     <title>Blerp</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="blerp.js"></script>
+    <script src="levels.js"></script>
+    <script src="gui.js"></script>
     <script src="engine.js"></script>
     <script src="sim.js"></script>
     <link rel="stylesheet" href="style.css">
@@ -26,7 +27,8 @@
                 <div class="label"> CPU (%): <span class="value" id="cpu"></span></div>
                 <div class="label"> RAM (%): <span class="value"id="ram"></span></div>
                 <div class="label"> Disk Util. (%): <span class="value" id="disk"></span></div>
-                <div class="label"> Ops /s: <span class="value" id="ops"></span></div>
+                <div style="clear:left" class="label"> Transactions /s: <span class="value" id="ops"></span></div>
+                <div class="label"> Target Transactions. /s: <span class="value" id="target"></span></div>
             </div>
             <svg class="scrollgraph" id="simchart"></svg>
         </div>

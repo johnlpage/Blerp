@@ -8,74 +8,6 @@ const levels = []
 let currentLevelNo = 0
 let idElement
 
-function tutorialLevels()
-{
-  const tutorialone = {
-    intro: [{
-      msg: `In this game you construct MongoDB schemas to meet performance targets.</p>
-      You are presented with a set of fields you can drag into collections. Each collection must have a field called _id
-      which is the unique identifier for each document`
-    }, { msg: 'By default MongoDB will set the value of the _id field for you as type ObjectId(). This a globally unique auto generated identifier.' },
-    { msg: 'Drag the _id field to the space blow then click Test Schema' }],
-    fields: ['_id:ObjectId()'],
-    tests: []
-  }
-
-  levels.push(tutorialone)
-
-  const tutorialtwo = {
-    intro: [{ x: 5, y: 40, w: 90, h: 90, msg: 'The _id field value is unique and always has an index to make it fast to retrieve by.' },
-      { msg: 'Instead of a random ObjectId() we can store our own unique keys in _id' },
-      { msg: 'Drag the _id field below then drag CustomerId on top to make a collection where CustomerId is the unique identifier then click "Test Schema"' }
-    ],
-    fields: ['_id: ObjectId()', 'CustomerID'],
-    tests: []
-  }
-  levels.push(tutorialtwo)
-
-  const tutorialthree = {
-    intro: [{ x: 5, y: 40, w: 90, h: 90, msg: 'A collection with only primary key is seldom useful, lets create a collection with multiple fields.' },
-      { msg: 'Drag the _id field down then the other fields underneath it one at a time to create a collection with multiple fields' }],
-    fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
-  }
-  levels.push(tutorialthree)
-
-  const tutorialfour = {
-    intro: [{ x: 5, y: 40, w: 90, h: 90, msg: 'We can create multiple collections to model our data, Just drag _id down again to start a second colleciton' },
-      { msg: 'A Customer may have muliple phone numbers, create two collections one for the customer and one for their phone numbers' },
-      { msg: 'If both contain CustomerId then we will be able to fetch all details for a given customer' }],
-    fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
-  }
-  levels.push(tutorialfour)
-
-  const tutorialfive = {
-    intro: [{
-      x: 5, y: 40, w: 90, h: 90, msg: 'Modeling a one to many relationship Customer->Phone like this means reading data from multiple places.'
-    },
-    { msg: 'This is less efficient when reading from the databasde' },
-    { msg: 'Document databases allow you to store multiple related values for the same field inside the same record' },
-    { msg: 'Drag Name and PhoneNumber into the same colleciton, then drag PhoneNumber <b>again</b> on top of itself to create an array of numbers' }],
-    fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber']
-  }
-  levels.push(tutorialfive)
-}
-
-function createLevels () {
-
-  tutorialLevels()
-  
-  // Using this to create engine test levels
-  const testLevel = {
-    intro: [{ msg: 'Create a Schema to retrieve Customer Names by CustomerID' }],
-    fields: ['_id: ObjectId()', 'CustomerId', 'Name'],
-    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { Name: 1, CustomerId: 1 }, target: 3800 }]
-  }
-
-  levels.push(testLevel)
-
- 
-}
-
 // Brings up a popup you must dismiss to continue
 // We need to make these dialogs
 function messageBubble (prompt, cb) {
@@ -115,18 +47,23 @@ async function testSchema () {
       messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: testOutcome.msg }, restartLevel)
       return
     } else {
+      if (testOutcome.performance > 0) {
       // Show the performance
       // eslint-disable-next-line no-undef
-      await new Promise((resolve) => { simulateOp(testOutcome, resolve) })
-      // And fail if we have to
-      if (testOutcome.performance < testOutcome.target) {
-        messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'Sorry but that\'s not fast enough' }, restartLevel)
-        return
+        testOutcome.vrange = test.vrange ? test.vrange : 12000
+        await new Promise((resolve) => { simulateOp(testOutcome, resolve) })
+        // And fail if we have to
+        if (testOutcome.performance < testOutcome.target) {
+          messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'Sorry but that\'s not fast enough' }, restartLevel)
+          return
+        }
       }
     }
   }
-
-  messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'Well Done - but retrying anyway for testing' }, restartLevel)
+  localStorage.setItem(levels[currentLevelNo]._id, true)
+  let congrats = levels[currentLevelNo].congrats
+  if (congrats === undefined) congrats = 'Well Done - that\'s correct'
+  messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: congrats }, startNextLevel)
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -161,15 +98,23 @@ function closeMessage (ev, cb) {
   if (cb) { cb() }
 }
 
-function tutorial (level) {
+function showIntro (level) {
   if (level.prompt === undefined) { level.prompt = 0 };
   if (level.prompt >= level.intro.length) { return }
-  messageBubble(level.intro[level.prompt], () => { tutorial(level) })
+  messageBubble(level.intro[level.prompt], () => { showIntro(level) })
   level.prompt = level.prompt + 1
 }
 
 function startLevel (level) {
   let x = 10
+  // Skip completed levels
+  let levelid = levels[currentLevelNo]._id
+  while (localStorage.getItem(levelid)) {
+    console.log(`Skipping ${levelid} as alreadly complete`)
+    currentLevelNo++
+    levelid = levels[currentLevelNo]._id
+  }
+  level = levels[currentLevelNo]
   console.log(`Starting Level ${currentLevelNo}`)
   for (const label of level.fields) {
     const newEl = newElement(x, 10, label, true)
@@ -179,9 +124,9 @@ function startLevel (level) {
   }
   idElement = fields[0]
   level.prompt = 0
-  tutorial(level)
+  showIntro(level)
 }
-
+/* global createLevels */
 // eslint-disable-next-line no-unused-vars
 function onLoad () {
   createLevels()

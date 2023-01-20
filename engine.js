@@ -20,6 +20,37 @@ function perfTest (op, collections, constraints) {
   console.log(JSON.stringify(op))
   console.log(JSON.stringify(collections, null, 2))
   let findOp
+  if (op.op === 'exact') {
+    /* Check we have exactly what is specified */
+    /* Specifically for each list of fields we have a collection with that list
+    and the same first element */
+
+    for (const testcollection of op.collections) {
+      console.log('testing', JSON.stringify(testcollection))
+      let matchedfields = false
+      let matchedarrays = true
+      for (const checkcollection of collections) {
+        console.log('checking', checkcollection)
+        if (checkcollection.fields[0] === testcollection.fields[0]) {
+          const intersection = testcollection.fields.filter(value => checkcollection.fields.includes(value))
+          if (intersection.length === testcollection.fields.length) {
+            matchedfields = true
+            /* If we had the fields check we have the required arrays */
+            /* Think logic breaks if we have two collections with fields one without arrays TODO BUG */
+            if (testcollection.arrays) {
+              for (const ta of testcollection.arrays) {
+                if (checkcollection.arrays.includes(ta) === false) {
+                  matchedarrays = false
+                }
+              }
+            }
+          }
+        }
+      }
+      if (matchedfields === false || matchedarrays === false) return { msg: 'That\'s not quite right', ok: false }
+    }
+    return { ok: true }
+  }
   if (op.op === 'find') {
     findOp = findPerfTest(op, collections, constraints)
     console.log(findOp)
@@ -27,7 +58,7 @@ function perfTest (op, collections, constraints) {
       return { msg: 'It\'s not possible to perform the operations with that schema', ok: false }
     }
   } else {
-    return { msg: `Operations type ${op} is not supported`, ok: false }
+    return { msg: `Operations type ${op.op} is not supported`, ok: false }
   }
 
   return findOp
@@ -70,7 +101,7 @@ function findPerfTest (op, collections, constraints) {
     return { possible: false }
   }
   // TODO - not hard code Resource usage
-  return { possible: true, performance: C_OPS_PERCPU/bestPerf.cost, target: op.target, cpu: bestPerf.cpu, ram: bestPerf.ram, iops: bestPerf.iops }
+  return { possible: true, performance: C_OPS_PERCPU / bestPerf.cost, target: op.target, cpu: bestPerf.cpu, ram: bestPerf.ram, iops: bestPerf.iops }
 }
 
 const C_OPS_PERCPU = 12500

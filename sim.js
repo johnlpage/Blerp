@@ -1,8 +1,11 @@
 let x, y, line, data, target
 let cpu, disk, ram
-let ops, graphtime
+let ops, graphtime, vrange
 let resolvefn
 
+/* This Rather Ugly code simulates watching the database run in a monitoring tool */
+
+/* global d3 */
 const slideTime = 50
 
 function tickv () {
@@ -12,11 +15,11 @@ function tickv () {
     setLabel('cpu', Math.round(cpu + (Math.random() * 2) - 1))
     setLabel('ram', ram)
     setLabel('disk', Math.floor(disk + (Math.random() * 1) - 0.5))
-    setLabel('ops', Math.floor(ops * (0.95 + Math.random() * 0.1))
-    )
+    setLabel('ops', Math.floor(ops * (0.98 + Math.random() * 0.02)))
+    setLabel('target', target)
   }
 
-  data.push(ops * (0.8 + Math.random() * 0.4))
+  data.push(ops * (0.95 + Math.random() * 0.1))
 
   data.shift()
 
@@ -45,6 +48,7 @@ function simulateOp (opdesc, resolve) {
   cpu = opdesc.cpu
   ram = opdesc.ram
   disk = opdesc.iops
+  vrange = opdesc.vrange
   resolvefn = resolve
   graphtime = 400
   ops = opdesc.performance
@@ -63,20 +67,19 @@ function closeSim () {
   resolvefn()
 }
 
-// eslint-disable-next-line no-unused-vars
 function testSim () {
   document.getElementById('dialogbackground').style.display = 'inline'
   const simElement = document.getElementById('simulator')
   simElement.style.display = 'inline'
   const n = 100
-  simChartElement = document.getElementById('simchart')
+  const simChartElement = document.getElementById('simchart')
   const simChart = d3.select('#simchart')
 
   // eslint-disable-next-line no-undef
   data = d3.range(n).map(() => 0)
   d3.selectAll('svg > *').remove() // Clear the chart
   // Add a graphics context in the SVG with a margin
-  const margin = { top: 10, right: 10, bottom: 10, left: 10 }
+  const margin = { top: 20, right: 10, bottom: 10, left: 10 }
   const width = +simChartElement.clientWidth - margin.left - margin.right
   const height = +simChartElement.clientHeight - margin.top - margin.bottom
   console.log(width, height)
@@ -85,14 +88,12 @@ function testSim () {
   console.log(g)
   // isHorizontal=true
 
-  const rangescale = 5000 /* Vertical range */
-
   x = d3.scaleLinear()
     .domain([1, n - 2])
     .range([0, width])
 
   y = d3.scaleLinear()
-    .domain([0, rangescale])
+    .domain([0, vrange])
     .range([height, 0])
 
   line = d3.line()
@@ -102,9 +103,7 @@ function testSim () {
 
   // Add scales to axis
   const yAxis = d3.axisRight()
-    .scale(y)
-
-  // yAxis.select(".domain").remove();
+    .scale(y).ticks(4)
 
   g.append('defs').append('clipPath')
     .attr('id', 'clip_speedline')
@@ -116,12 +115,16 @@ function testSim () {
 
   // Append group and insert axis
   g.append('g')
-    .attr('class', 'yaxis')
     .call(yAxis)
+    .attr('class', 'yaxis')
+    .style('stroke', 'white')
+    .style('fill', 'white')
+    .style('font-size', '3vw')
+    .style('font-family', 'sans-serif').select('.domain').remove()
 
   g.append('line')
     .attr('class', 'mean-line')
-    .style('stroke', 'red')
+    .style('stroke', 'white')
     .attr('x1', 0)
     .attr('x2', width)
     .attr('y1', y(target))
@@ -130,10 +133,9 @@ function testSim () {
   g.append('text')
     .text(`Target ${target}`)
     .style('stroke', 'white')
-    .attr('class', 'yaxis')
-    .attr('fill', 'none') // <=== Fill set to none by D3
-    .attr('font-size', 10)
-    .attr('font-family', 'sans-serif')
+    .style('fill', 'white')
+    .style('font-size', '3vw')
+    .style('font-family', 'sans-serif')
     .attr('x', width - 100)
     .attr('y', y(target))
 
