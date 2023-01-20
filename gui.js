@@ -112,6 +112,10 @@ function startLevel (level) {
   while (localStorage.getItem(levelid)) {
     console.log(`Skipping ${levelid} as alreadly complete`)
     currentLevelNo++
+    if (currentLevelNo >= levels.length) {
+      messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: "You have completed all levels, thank's for playing. Go try out the real thing now" }, () => { console.log('Byee'); window.location.replace('http://cloud.mongodb.com') })
+      return
+    }
     levelid = levels[currentLevelNo]._id
   }
   level = levels[currentLevelNo]
