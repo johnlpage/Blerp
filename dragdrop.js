@@ -3,14 +3,14 @@
 function dragEnd (dropX, dropY, text, isId) {
   // We can drop _id anywhere, others only on an existing schema
   if (isId) {
-    // const el = newElement(dropX, dropY, text, false, true)
     app.collections.push({ cX: dropX, cY: dropY, arrays: [], fields: [text] })
-    app.collections.sort((a, b) => { return b.cY - a.cY })
+
     // Make everything draggable now
   } else {
     console.log('Not ID')
     // Can only drop a non _id field under a collection
-    for (const collection of app.collections) {
+    // Iterate in order of ypos
+    for (const collection of [...app.collections].sort((a, b) => { return b.cY - a.cY })) {
       const idX = collection.cX
       const idY = collection.cY
       // Need height to ensure dropping below not on top
@@ -47,6 +47,7 @@ function dragEnd (dropX, dropY, text, isId) {
 function browserDragStart (ev) {
   app.dragOffsetX = ev.offsetX
   app.dragOffsetY = ev.offsetY
+  app.selectedIndex = null
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -56,26 +57,30 @@ function browserDragEnd (ev) {
   }
 
   const text = ev.target.childNodes[0].data
-  const dropX = ev.clientX - app.dragOffsetX
-  const dropY = ev.clientY - app.dragOffsetY
+  let dropX = ev.clientX - app.dragOffsetX
+  let dropY = ev.clientY - app.dragOffsetY
 
   // Not outside the board
-  const boardEl = document.getElementById('game') /* May change to a board */
+  const boardEl = document.getElementById('board') /* May change to a board */
   const boardRect = boardEl.getBoundingClientRect()
   const elWidth = ev.target.getBoundingClientRect().width
+  dropX = dropX - boardRect.left
+  dropY = dropY - boardRect.top
 
-  console.log(dropX, boardRect)
-  if (dropX < boardRect.left || dropX > boardRect.right - elWidth) {
+  console.log(dropX, dropY, boardRect)
+  if (dropX < 1 || dropX > boardRect.width - elWidth) {
     return
   }
   console.log(ev.target)
   const isId = (ev.target.textContent === app.fields[0])
+  // Shift relative to parent
 
   dragEnd(dropX, dropY, text, isId)
 }
 
 // eslint-disable-next-line no-unused-vars
 function mobileDragStart (ev) {
+  app.selectedIndex = null
   // Use draggable to determine if we do this
   if (ev.target.draggable === false) return
   console.log('start')
@@ -117,9 +122,12 @@ function mobileDragEnd (ev) {
   if (app.dragField.visible === false) {
     return // Not Dragging
   }
+  const boardEl = document.getElementById('board') /* May change to a board */
+  const boardRect = boardEl.getBoundingClientRect()
+
   app.dragField.visible = false
   // TODO - Check we dragged far enough
   const text = ev.target.textContent
   const isId = (ev.target.textContent === app.fields[0])
-  dragEnd(app.dragField.x, app.dragField.y, text, isId)
+  dragEnd(app.dragField.x - boardRect.left, app.dragField.y - boardRect.top, text, isId)
 }

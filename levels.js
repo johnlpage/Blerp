@@ -82,6 +82,15 @@ function testLevels (levelList) {
   }
   levelList.push(beginner1)
 
+  const indexdev = {
+    _id: 'indexdev',
+    intro: [],
+    fields: ['_id: ObjectId()', 'CustomerId', 'CustomerPhone', 'CustomerDetails'],
+    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { CustomerDetails: 1, CustomerId: 1 }, target: 3800, vrange: 5000 }],
+    flag: "indexes"
+  }
+  levelList.push(indexdev)
+
   const beginner2 = {
     _id: 'beginner_2',
     intro: [{
@@ -90,11 +99,8 @@ function testLevels (levelList) {
     {
       msg: 'We could have two collections and the customer details in both using different values for _id but then we would be storing all the same data twice, which isnt sensible.'
     },
-    { msg: 'What we can do is create an additional index on the phone number field, this will make writing a little slower but reading much much faster.' },
-    {
-      msg: `The business estimates we need to fetch 3800 records per second at peak, and we are running on an 
-     Atlas M10 hosted instance - which has 1 CPU , 2GB RAM and a reasonably fast disk. `
-    }],
+    { msg: 'What we can do is create an additional index on the phone number field, this will make writing a little slower but reading much much faster.' }
+   ],
     fields: ['_id: ObjectId()', 'CustomerId', 'CustomerDetails'],
     tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { CustomerDetails: 1, CustomerId: 1 }, target: 3800, vrange: 5000 }],
     congrats: "Well done, by putting the CustomerId in the Id field it's much faster to retrieve as it has an index."

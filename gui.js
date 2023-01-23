@@ -7,12 +7,15 @@ function onLoad () {
   const { createApp } = Vue
   app = createApp({
     // eslint-disable-next-line no-undef
-    methods: { browserDragStart, browserDragEnd, mobileDragStart, mobileDragEnd, mobileDrag, deleteField, closeMessage },
+    methods: { browserDragStart, browserDragEnd, mobileDragStart, mobileDragEnd, mobileDrag, deleteField, closeMessage, addIndex, deleteIndex,selectIndex },
     data () {
       return {
+        selectedIndex: null,
+        colours: ['green', 'blue', 'purple'],
         collections: [],
         fields: [],
         levels: [],
+        indexes: [],
         currentLevel: {},
         currentLevelNo: 0,
         dragOffsetX: 0,
@@ -109,6 +112,7 @@ function clearSchema () {
 function closeMessage () {
   app.showMessageBubble = false
   app.showDialog = false
+  app.selectedIndex = null
   if (app.messageBubble.cb) { app.messageBubble.cb() }
 }
 
@@ -120,6 +124,7 @@ function showIntro (level) {
 }
 
 function startLevel (levelNo) {
+  app.selectedIndex = null
   let level = app.levels[levelNo]
   // Skip completed levels
   console.log(level)
@@ -131,13 +136,14 @@ function startLevel (levelNo) {
     console.log(`Skipping ${level._id} as alreadly complete`)
     app.currentLevelNo++
     level = app.levels[app.currentLevelNo]
-    if (level.flag) {
-      app.flags[level.flag] = true
-      console.log(`Enabled: ${level.flag}`)
-    }
+
     if (level === undefined) {
       messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: "You have completed all levels, thank's for playing. Go try out the real thing now" }, () => { console.log('Byee'); window.location.replace('http://cloud.mongodb.com') })
       return
+    }
+    if (level.flag) {
+      app.flags[level.flag] = true
+      console.log(`Enabled: ${level.flag}`)
     }
   }
 
@@ -150,6 +156,7 @@ function startLevel (levelNo) {
 }
 
 function deleteField (collectionidx, fieldidx) {
+  app.selectedIndex = null
   if (fieldidx === 0) {
     app.collections.splice(collectionidx, 1)
   } else {

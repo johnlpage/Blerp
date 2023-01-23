@@ -14,11 +14,12 @@
     <script src="gui.js"></script>
     <script src="engine.js"></script>
     <script src="sim.js"></script>
+    <script src="indexes.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body onLoad="onLoad()">
-    <div id="game" class="game">
+    <div id="game" class="game" :click="selectedIndex=null" >
         <div id="menu" class="menu">
             <div class="menubutton" id="testbutton" onclick="testSchema()">Test Schema</div>
             <div class="menubutton" id="clearbutton" onclick="restartLevel()">Restart Level</div>
@@ -35,19 +36,28 @@
             {{dragField.text}} </div>
 
         <div class="board" id="board">
+            <div class="indexheader"> Collections </div>
             <div v-for='(collection,colidx) in collections' class='board_collection'
                 :style="{left: collection.cX+'px',top: collection.cY+'px'}">
-                <div v-for="(field,index) in collection.fields" class="board_field">
+                <div v-for="(field,index) in collection.fields" class="board_field" @click="addIndex(colidx,index)" :style="{'background-color': colours[colidx]}">
                     <template v-if="index === 0 && field !== fields[0]">_id: {{field}} </template>
                     <template v-else-if="collection.arrays.includes(field)">Array( {{field}} ) </template>
                     <template v-else> {{field}} </template>
-                    <div @click="deleteField(colidx,index)" class="deletebutton">X</div>
+                    <div @click.stop=" deleteField(colidx,index)" class="deletebutton">X</div>
                 </div>
             </div>
         </div>
 
+        <div v-if="indexes.length > 0" class="indexes" id="indexes">
+            <div class="indexheader"> Indexes </div>
+            <div v-for='(index,indexidx) in indexes' :class='{index:true, selectedindex: (index == selectedIndex)}' @click="selectIndex(indexidx)" :style="{'background-color': colours[index.collection]}">
+                {{ index.fields}}
+                <div @click.stop="deleteIndex(indexidx)" class="deletebutton">X</div>
+            </div>
+        </div>
+
         <div v-show="showSimulator" id="simulator" class="simulator">
-            <div class="deletebutton" onclick="closeSim()">X</div>
+            <div class="deletebutton" onclick.stop="closeSim()">X</div>
             <div class="labels">
                 <div class="label"> CPU (%): <span class="value" id="cpu">{{simulator.cpu}}</span></div>
                 <div class="label"> RAM (%): <span class="value" id="ram">{{simulator.ram}}</span></div>
