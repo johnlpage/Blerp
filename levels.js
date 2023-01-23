@@ -44,7 +44,7 @@ function tutorialLevels (levelList) {
       { msg: 'Create two collections one for Customers and One for orders' },
       { msg: 'Assuming both sets contain a customer identifier then we will be able to fetch all Orders for a given customer' }],
     fields: ['_id: ObjectId()', 'CustomerDetails', 'OrderDetails'],
-    tests: [{ op: 'exact', collections: [{ fields: ['_id', 'CustomerDetails'] }, { fields: ['_id', 'OrderDetails'] }] }]
+    tests: [{ op: 'exact', collections: [{ fields: ['_id: ObjectId()', 'CustomerDetails'] }, { fields: ['_id: ObjectId()', 'OrderDetails'] }] }]
 
   }
   levelList.push(tutorialfour)
@@ -58,7 +58,8 @@ function tutorialLevels (levelList) {
     { msg: 'Document databases allow you to store multiple related values for the same field inside the same record' },
     { msg: 'Drag CustomerId, CustomerDetails and OrderDetails into one collection, then drag OrderDetails <b>again</b> on top of itself to create an array of numbers' }],
     fields: ['_id: ObjectId()', 'CustomerId', 'CustomerDetails', 'OrderDetails'],
-    tests: [{ op: 'exact', collections: [{ fields: ['_id', 'CustomerId', 'CustomerDetails', 'OrderDetails'], arrays: ['OrderDetails'] }] }]
+    tests: [{ op: 'exact', collections: [{ fields: ['_id: ObjectId()', 'CustomerId', 'CustomerDetails', 'OrderDetails'], arrays: ['OrderDetails'] }] }],
+    flag: 'arrays'
   }
   levelList.push(tutorialfive)
 }
@@ -87,7 +88,7 @@ function testLevels (levelList) {
       msg: 'Now we have new requirement, we need to be able to get Customer Details by CustomerId but also by their Phone number.'
     },
     {
-      msg: 'We could have two collections and the customer details in both using different values for _id but then we woudl be storing all the same data twice, which isnt sensible.'
+      msg: 'We could have two collections and the customer details in both using different values for _id but then we would be storing all the same data twice, which isnt sensible.'
     },
     { msg: 'What we can do is create an additional index on the phone number field, this will make writing a little slower but reading much much faster.' },
     {

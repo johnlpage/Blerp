@@ -1,6 +1,6 @@
 let app
 /* global Vue */
-const TESTING = true
+const TESTING = false
 
 // eslint-disable-next-line no-unused-vars
 function onLoad () {
@@ -125,11 +125,16 @@ function startLevel (levelNo) {
   console.log(level)
   if (level.flag) {
     app.flags[level.flag] = true
+    console.log(`Enabled: ${level.flag}`)
   }
   while (localStorage.getItem(level._id) && !TESTING) {
     console.log(`Skipping ${level._id} as alreadly complete`)
     app.currentLevelNo++
     level = app.levels[app.currentLevelNo]
+    if (level.flag) {
+      app.flags[level.flag] = true
+      console.log(`Enabled: ${level.flag}`)
+    }
     if (level === undefined) {
       messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: "You have completed all levels, thank's for playing. Go try out the real thing now" }, () => { console.log('Byee'); window.location.replace('http://cloud.mongodb.com') })
       return

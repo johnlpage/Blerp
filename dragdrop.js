@@ -7,7 +7,6 @@ function dragEnd (dropX, dropY, text, isId) {
     app.collections.push({ cX: dropX, cY: dropY, arrays: [], fields: [text] })
     app.collections.sort((a, b) => { return b.cY - a.cY })
     // Make everything draggable now
-    // TOVUE - add conditional drag for (const f of fields) { f.draggable = true };
   } else {
     console.log('Not ID')
     // Can only drop a non _id field under a collection
@@ -24,10 +23,11 @@ function dragEnd (dropX, dropY, text, isId) {
           collection.fields.push(text)
         } else {
           // Dropping twice makes this an array
-          console.log('Make Array')
-          if (collection.arrays.includes(text) === false) {
-            collection.arrays.push(text)
-            // TOVUE - Show Arrays
+          if (app.flags.arrays) {
+            console.log('Make Array')
+            if (collection.arrays.includes(text) === false) {
+              collection.arrays.push(text)
+            }
           }
         }
         break
@@ -64,7 +64,7 @@ function browserDragEnd (ev) {
   const boardRect = boardEl.getBoundingClientRect()
   const elWidth = ev.target.getBoundingClientRect().width
 
-  console.log(dropX,boardRect)
+  console.log(dropX, boardRect)
   if (dropX < boardRect.left || dropX > boardRect.right - elWidth) {
     return
   }
