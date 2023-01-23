@@ -3,6 +3,24 @@ Live at:
 https://johnlpage.github.io/Blerp/
 
 
+TODO List
+----------
+~~Rewrite HTML/Render uing Vue.js (Shoudl have done that to start with)~~
+Add 'Feature Enablement' flags
+~~Fix 'Mobile Ratio' on browser~~
+
+Indexes GUI
+Write speed simulation
+    Covering Indexes
+Limited Arrays GUI
+Concept of JOINs
+
+
+Suggestions
+------------
+
+Show where drops will happen
+
 
 Rules/Explainer
 -----------------
@@ -23,33 +41,6 @@ YOuy can use any field as a unique identifer - if it's not unique then it will b
 Bugs/Issues
 ------------
 Drop Beneath doesnt go far enough to the right
-
-
-
-Notes
---------
-
-Start a new collection with _id
-Default is ObjectID but you can drag over it to change.
-Snap fields underneath
-
-Need a way to indicate there are multiple values for a field
-
-Can create indexes
-
-
-
-TODO
-----------
-~~Add the idea of 'Levels'~~
-
-~~~Delete Collection~~
-~~Delete Field~~
-~~Replace ID~~
-~~Popups~~
-Tutorial/Level Complete
-
-Support Arrays (UX?
-
-Move/Drag Collection?
+Move/Drag Collection not supported?
+Failure restarts whole level? UX issue
 

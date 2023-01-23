@@ -1,6 +1,6 @@
-/* global levels */
 
-function tutorialLevels () {
+
+function tutorialLevels (levelList) {
   const tutorialone = {
     _id: 'tutorial_1',
     intro: [{
@@ -15,7 +15,7 @@ function tutorialLevels () {
     congrats: "Great, now let's try adding multiple fields."
   }
 
-  levels.push(tutorialone)
+  levelList.push(tutorialone)
 
   const tutorialthree = {
     _id: 'tutorial_3',
@@ -24,7 +24,7 @@ function tutorialLevels () {
     fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber'],
     tests: [{ op: 'exact', collections: [{ fields: ['_id', 'CustomerId', 'Name', 'PhoneNumber'] }] }]
   }
-  levels.push(tutorialthree)
+  levelList.push(tutorialthree)
 
   const tutorialtwo = {
     _id: 'tutorial_2',
@@ -35,7 +35,7 @@ function tutorialLevels () {
     fields: ['_id: ObjectId()', 'CustomerID'],
     tests: [{ op: 'exact', collections: [{ fields: ['CustomerID'] }] }]
   }
-  levels.push(tutorialtwo)
+  levelList.push(tutorialtwo)
 
   const tutorialfour = {
     _id: 'tutorial_4',
@@ -47,7 +47,7 @@ function tutorialLevels () {
     tests: [{ op: 'exact', collections: [{ fields: ['_id', 'CustomerDetails'] }, { fields: ['_id', 'OrderDetails'] }] }]
 
   }
-  levels.push(tutorialfour)
+  levelList.push(tutorialfour)
 
   const tutorialfive = {
     _id: 'tutorial_5',
@@ -60,15 +60,13 @@ function tutorialLevels () {
     fields: ['_id: ObjectId()', 'CustomerId', 'CustomerDetails', 'OrderDetails'],
     tests: [{ op: 'exact', collections: [{ fields: ['_id', 'CustomerId', 'CustomerDetails', 'OrderDetails'], arrays: ['OrderDetails'] }] }]
   }
-  levels.push(tutorialfive)
+  levelList.push(tutorialfive)
 }
 
-// eslint-disable-next-line no-unused-vars
-function createLevels () {
-  tutorialLevels()
-
+function testLevels (levelList) {
   // Using this to create engine test levels
-  const testLevel = {
+  const beginner1 = {
+    _id: 'beginner_1',
     intro: [{
       msg: `OK, we are ready for out first real challenge, let\'s start with something simple
      - we need to be able to fetch our customers details by CustomerId. We have tens of thousands of customers.`
@@ -78,8 +76,33 @@ function createLevels () {
      Atlas M10 hosted instance - which has 1 CPU , 2GB RAM and a reasonably fast disk. `
     }],
     fields: ['_id: ObjectId()', 'CustomerId', 'CustomerDetails'],
-    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { CustomerDetails: 1, CustomerId: 1 }, target: 3800, vrange: 5000 }]
+    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { CustomerDetails: 1, CustomerId: 1 }, target: 3800, vrange: 5000 }],
+    congrats: "Well done, by putting the CustomerId in the Id field it's much faster to retrieve as it has an index."
   }
+  levelList.push(beginner1)
 
-  levels.push(testLevel)
+  const beginner2 = {
+    _id: 'beginner_2',
+    intro: [{
+      msg: 'Now we have new requirement, we need to be able to get Customer Details by CustomerId but also by their Phone number.'
+    },
+    {
+      msg: 'We could have two collections and the customer details in both using different values for _id but then we woudl be storing all the same data twice, which isnt sensible.'
+    },
+    { msg: 'What we can do is create an additional index on the phone number field, this will make writing a little slower but reading much much faster.' },
+    {
+      msg: `The business estimates we need to fetch 3800 records per second at peak, and we are running on an 
+     Atlas M10 hosted instance - which has 1 CPU , 2GB RAM and a reasonably fast disk. `
+    }],
+    fields: ['_id: ObjectId()', 'CustomerId', 'CustomerDetails'],
+    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { CustomerDetails: 1, CustomerId: 1 }, target: 3800, vrange: 5000 }],
+    congrats: "Well done, by putting the CustomerId in the Id field it's much faster to retrieve as it has an index."
+  }
+  levelList.push(beginner2)
+}
+
+// eslint-disable-next-line no-unused-vars
+function createLevels (levelList) {
+  tutorialLevels(levelList)
+  testLevels(levelList)
 }

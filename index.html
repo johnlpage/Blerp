@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html>
+
 
 <head>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Blerp</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="dragdrop.js"></script>
     <script src="levels.js"></script>
     <script src="gui.js"></script>
     <script src="engine.js"></script>
@@ -15,27 +18,51 @@
 </head>
 
 <body onLoad="onLoad()">
-    <div id="game" class="game" >
+    <div id="game" class="game">
         <div id="menu" class="menu">
             <div class="menubutton" id="testbutton" onclick="testSchema()">Test Schema</div>
             <div class="menubutton" id="clearbutton" onclick="restartLevel()">Restart Level</div>
         </div>
-        <div id="pallette" class="fieldlist"></div>
-        <div id="simulator" class="simulator">
+        <div id="pallette" class="pallette">
+            <div v-for='field in fields' @touchstart="mobileDragStart" @touchmove="mobileDrag" @touchend="mobileDragEnd"
+                @dragstart="browserDragStart" @dragend="browserDragEnd" draggable=true class='pallette_field'>
+                {{field}}
+            </div>
+        </div>
+
+        <!-- Fake field show in mobile/touch drag-->
+        <div v-if="dragField.visible" :style="{left: dragField.x+'px',top: dragField.y+'px'}" class="drag_field">
+            {{dragField.text}} </div>
+
+        <div class="board" id="board">
+            <div v-for='(collection,colidx) in collections' class='board_collection'
+                :style="{left: collection.cX+'px',top: collection.cY+'px'}">
+                <div v-for="(field,index) in collection.fields" class="board_field">
+                    <template v-if="index === 0 && field !== fields[0]">_id: {{field}} </template>
+                    <template v-else-if="collection.arrays.includes(field)">Array( {{field}} ) </template>
+                    <template v-else> {{field}} </template>
+                    <div @click="deleteField(colidx,index)" class="deletebutton">X</div>
+                </div>
+            </div>
+        </div>
+
+        <div v-show="showSimulator" id="simulator" class="simulator">
             <div class="deletebutton" onclick="closeSim()">X</div>
             <div class="labels">
-                <div class="label"> CPU (%): <span class="value" id="cpu"></span></div>
-                <div class="label"> RAM (%): <span class="value"id="ram"></span></div>
-                <div class="label"> Disk Util. (%): <span class="value" id="disk"></span></div>
-                <div style="clear:left" class="label"> Transactions /s: <span class="value" id="ops"></span></div>
-                <div class="label"> Target Transactions. /s: <span class="value" id="target"></span></div>
+                <div class="label"> CPU (%): <span class="value" id="cpu">{{simulator.cpu}}</span></div>
+                <div class="label"> RAM (%): <span class="value" id="ram">{{simulator.ram}}</span></div>
+                <div class="label"> Disk Util. (%): <span class="value" id="disk">{{simulator.disk}}</span></div>
+                <div style="clear:left" class="label"> Transactions /s: <span class="value" id="ops">{{simulator.ops}}</span></div>
+                <div class="label"> Target Transactions. /s: <span class="value" id="target">{{simulator.target}}</span></div>
             </div>
-            <svg class="scrollgraph" id="simchart"></svg>
+            <svg class="scrollgraph" id="simchart" ref="simchart"></svg>
         </div>
-        <div id="dialogbackground" class="dialogbackground"></div>
 
+        <div v-show="showDialog" id="dialogbackground" class="dialogbackground"></div>
+
+        <div v-show="showMessageBubble" class="messagebubble" :style="{left: messageBubble.x +'%', top: messageBubble.y + '%' , width: messageBubble.w + '%'   }">
+            <div class="deletebutton" @click="closeMessage()">X</div>
+            {{messageBubble.msg}}
+        </div>
     </div>
-
 </body>
-
-</html>

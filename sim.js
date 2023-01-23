@@ -1,82 +1,82 @@
-let x, y, line, data, target
-let cpu, disk, ram
-let ops, graphtime, vrange
-let resolvefn
+
+/* global app */
 
 /* This Rather Ugly code simulates watching the database run in a monitoring tool */
 
 /* global d3 */
 const slideTime = 50
+const graphUpdateTime = 50
+const nPoints = 100
 
 function tickv () {
-  console.log('Tickv')
-
-  if (graphtime % 50 === 0) {
-    setLabel('cpu', Math.round(cpu + (Math.random() * 2) - 1))
-    setLabel('ram', ram)
-    setLabel('disk', Math.floor(disk + (Math.random() * 1) - 0.5))
-    setLabel('ops', Math.floor(ops * (0.98 + Math.random() * 0.02)))
+  if (false && app.simulator.graphtime % graphUpdateTime === 0) {
+    setLabel('cpu', Math.round(app.simulator.cpu + (Math.random() * 2) - 1))
+    setLabel('ram', app.simulator.ram)
+    setLabel('disk', Math.floor(app.simulator.disk + (Math.random() * 1) - 0.5))
+    setLabel('ops', Math.floor(app.simulator.ops * (0.98 + Math.random() * 0.02)))
     setLabel('target', target)
   }
 
-  data.push(ops * (0.95 + Math.random() * 0.1))
+  app.simulator.data.push(app.simulator.ops * (0.95 + Math.random() * 0.1))
 
-  data.shift()
+  app.simulator.data.shift()
 
   d3.select(this)
-    .attr('d', line)
+    .attr('d',
+      app.simulator.line)
     .attr('transform', null)
 
-  graphtime--
-  if (graphtime > 0) {
+  app.simulator.graphtime--
+  if (app.simulator.graphtime > 0) {
     d3.active(this)
-      .attr('transform', 'translate(' + x(0) + ',0)')
+      .attr('transform', 'translate(' + app.simulator.x(0) + ',0)')
       .transition()
       .on('start', tickv)
   } else {
-    console.log(data)
+    console.log(
+      app.simulator.data)
   }
 }
 
 function setLabel (label, value) {
   document.getElementById(label).innerText = value
 }
+
 // eslint-disable-next-line no-unused-vars
 function simulateOp (opdesc, resolve) {
   console.log(opdesc)
-  target = opdesc.target
-  cpu = opdesc.cpu
-  ram = opdesc.ram
-  disk = opdesc.iops
-  vrange = opdesc.vrange
-  resolvefn = resolve
-  graphtime = 400
-  ops = opdesc.performance
-  console.log(`Ops per second at ${opdesc.performance} ticks per op is is ${ops}`)
-
+  app.simulator.target = opdesc.target
+  app.simulator.cpu = opdesc.cpu
+  app.simulator.ram = opdesc.ram
+  app.simulator.disk = opdesc.iops
+  app.simulator.vrange = opdesc.vrange
+  app.simulator.resolvefn = resolve
+  app.simulator.graphtime = 400
+  app.simulator.ops = opdesc.performance
   testSim()
 }
 
 // eslint-disable-next-line no-unused-vars
 function closeSim () {
-  graphtime = 0 /* Stop animations */
-  data = []
-  document.getElementById('dialogbackground').style.display = 'none'
-  const simElement = document.getElementById('simulator')
-  simElement.style.display = 'none'
-  resolvefn()
+  app.simulator.graphtime = 0 /* Stop animations */
+  app.showDialog = false
+  app.showSimulator = false
+  app.simulator.resolvefn()
 }
 
-function testSim () {
-  document.getElementById('dialogbackground').style.display = 'inline'
-  const simElement = document.getElementById('simulator')
-  simElement.style.display = 'inline'
-  const n = 100
+async function testSim () {
+  app.showDialog = true
+  app.showSimulator = true
+
+  // eslint-disable-next-line no-undef
+  await Vue.nextTick() /* Have to wait for it to draw */
+
   const simChartElement = document.getElementById('simchart')
   const simChart = d3.select('#simchart')
 
   // eslint-disable-next-line no-undef
-  data = d3.range(n).map(() => 0)
+
+  app.simulator.data = d3.range(nPoints).map(() => 0)
   d3.selectAll('svg > *').remove() // Clear the chart
   // Add a graphics context in the SVG with a margin
   const margin = { top: 20, right: 10, bottom: 10, left: 10 }
@@ -88,17 +88,17 @@ function testSim () {
   console.log(g)
   // isHorizontal=true
 
-  x = d3.scaleLinear()
-    .domain([1, n - 2])
+  app.simulator.x = d3.scaleLinear()
+    .domain([1, nPoints - 2])
     .range([0, width])
 
-  y = d3.scaleLinear()
-    .domain([0, vrange])
+  const y = d3.scaleLinear()
+    .domain([0, app.simulator.vrange])
     .range([height, 0])
 
-  line = d3.line()
+  app.simulator.line = d3.line()
     .curve(d3.curveBasis)
-    .x(function (d, i) { return x(i) })
+    .x(function (d, i) { return app.simulator.x(i) })
     .y(function (d, i) { return y(d) })
 
   // Add scales to axis
@@ -111,7 +111,7 @@ function testSim () {
     .attr('width', width)
     .attr('height', height)
 
-  console.log(data)
+  console.log(app.simulator.data)
 
   // Append group and insert axis
   g.append('g')
@@ -119,7 +119,7 @@ function testSim () {
     .attr('class', 'yaxis')
     .style('stroke', 'white')
     .style('fill', 'white')
-    .style('font-size', '3vw')
+    .style('font-size', '2vh')
     .style('font-family', 'sans-serif').select('.domain').remove()
 
   g.append('line')
@@ -127,22 +127,23 @@ function testSim () {
     .style('stroke', 'white')
     .attr('x1', 0)
     .attr('x2', width)
-    .attr('y1', y(target))
-    .attr('y2', y(target))
+    .attr('y1', y(app.simulator.target))
+    .attr('y2', y(app.simulator.target))
 
   g.append('text')
-    .text(`Target ${target}`)
+    .text(`Target ${app.simulator.target}`)
     .style('stroke', 'white')
     .style('fill', 'white')
-    .style('font-size', '3vw')
+    .style('font-size', '2vh')
     .style('font-family', 'sans-serif')
-    .attr('x', width - 100)
-    .attr('y', y(target))
+    .attr('x', width)
+    .attr('y', y(app.simulator.target) - 20)
+    .attr('text-anchor','end')
 
   g.append('g')
     .attr('clip-path', 'url(#clip_speedline)')
     .append('path')
-    .datum(data)
+    .datum(app.simulator.data)
     .attr('class', 'line')
     .attr('id', 'speedline')
     .transition()
