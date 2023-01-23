@@ -5,10 +5,10 @@
 
 /* global d3 */
 const slideTime = 50
-const graphUpdateTime = 50
 const nPoints = 100
 
 function tickv () {
+  // TODO - Make CPU, RAM vary a little
 
   app.simulator.data.push(app.simulator.ops * (0.95 + Math.random() * 0.1))
 
@@ -29,10 +29,6 @@ function tickv () {
     console.log(
       app.simulator.data)
   }
-}
-
-function setLabel (label, value) {
-  document.getElementById(label).innerText = value
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -131,7 +127,7 @@ async function testSim () {
     .style('font-family', 'sans-serif')
     .attr('x', width)
     .attr('y', y(app.simulator.target) - 20)
-    .attr('text-anchor','end')
+    .attr('text-anchor', 'end')
 
   g.append('g')
     .attr('clip-path', 'url(#clip_speedline)')
