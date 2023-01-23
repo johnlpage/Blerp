@@ -62,7 +62,7 @@ async function testSchema () {
     console.log(testOutcome)
     if (testOutcome.ok === false) {
       /* We cannot use this schema at all */
-      messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: testOutcome.msg }, restartLevel)
+      messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: testOutcome.msg }, () => {})
       return
     } else {
       if (testOutcome.performance > 0) {
@@ -72,7 +72,7 @@ async function testSchema () {
         await new Promise((resolve) => { simulateOp(testOutcome, resolve) }) /* global simulateOp */
         // And fail if we have to
         if (testOutcome.performance < testOutcome.target) {
-          messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'Sorry but that\'s not fast enough' }, restartLevel)
+          messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: 'Sorry but that\'s not fast enough' }, () => {})
           return
         }
       }

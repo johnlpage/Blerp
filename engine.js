@@ -101,7 +101,7 @@ function findPerfTest (op, collections, constraints) {
     return { possible: false }
   }
   // TODO - not hard code Resource usage
-  return { possible: true, performance: C_OPS_PERCPU / bestPerf.cost, target: op.target, cpu: bestPerf.cpu, ram: bestPerf.ram, iops: bestPerf.iops }
+  return { possible: true, performance: Math.ceil(C_OPS_PERCPU / bestPerf.cost), target: op.target, cpu: bestPerf.cpu, ram: bestPerf.ram, iops: bestPerf.iops }
 }
 
 const C_OPS_PERCPU = 12500

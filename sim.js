@@ -9,13 +9,6 @@ const graphUpdateTime = 50
 const nPoints = 100
 
 function tickv () {
-  if (false && app.simulator.graphtime % graphUpdateTime === 0) {
-    setLabel('cpu', Math.round(app.simulator.cpu + (Math.random() * 2) - 1))
-    setLabel('ram', app.simulator.ram)
-    setLabel('disk', Math.floor(app.simulator.disk + (Math.random() * 1) - 0.5))
-    setLabel('ops', Math.floor(app.simulator.ops * (0.98 + Math.random() * 0.02)))
-    setLabel('target', target)
-  }
 
   app.simulator.data.push(app.simulator.ops * (0.95 + Math.random() * 0.1))
 
