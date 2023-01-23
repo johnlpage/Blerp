@@ -1,5 +1,6 @@
 let app
 /* global Vue */
+const TESTING = true
 
 // eslint-disable-next-line no-unused-vars
 function onLoad () {
@@ -19,6 +20,7 @@ function onLoad () {
         dragField: { x: 0, y: 0, text: '', visible: false },
         showDialog: false,
         showMessageBubble: false,
+        flags: {},
         messageBubble: { msg: 'No Message', cb: null },
         showSimulator: false,
         simulator: { data: null, line: null, x: null, graphtime: 0, cpu: 0, ram: 0, disk: 0, ops: 0, target: 0, vrange: 100, resolvefn: () => {} }
@@ -120,7 +122,11 @@ function showIntro (level) {
 function startLevel (levelNo) {
   let level = app.levels[levelNo]
   // Skip completed levels
-  while (localStorage.getItem(level._id)) {
+  console.log(level)
+  if (level.flag) {
+    app.flags[level.flag] = true
+  }
+  while (localStorage.getItem(level._id) && !TESTING) {
     console.log(`Skipping ${level._id} as alreadly complete`)
     app.currentLevelNo++
     level = app.levels[app.currentLevelNo]

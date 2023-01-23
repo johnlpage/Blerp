@@ -62,7 +62,7 @@
 
         <div v-show="showMessageBubble" class="messagebubble" :style="{left: messageBubble.x +'%', top: messageBubble.y + '%' , width: messageBubble.w + '%'   }">
             <div class="deletebutton" @click="closeMessage()">X</div>
-            {{messageBubble.msg}}
+            <span v-html="messageBubble.msg"></span>
         </div>
     </div>
 </body>

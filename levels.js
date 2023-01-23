@@ -1,17 +1,16 @@
 
-
 function tutorialLevels (levelList) {
   const tutorialone = {
     _id: 'tutorial_1',
     intro: [{
-      msg: `In this game you construct MongoDB schemas to meet business needs.</p>
+      msg: `In this game you construct MongoDB schemas to meet business needs.<p>
         First we will just walk through the controls so you can see how to build things.
-        You are presented with a set of fields you can drag into collections. Every collection has a field called _id
+        You are presented with a set of fields you can drag into collections.<p> Every collection has a field called _id
         which is the unique identifier `
     }, { msg: 'By default MongoDB will set the value of the _id field as an instance of an ObjectId. This an auto-generated globally unique value.' },
-    { msg: 'Drag the _id field to the space blow then click Test Schema to make your first collection' }],
-    fields: ['_id:ObjectId()'],
-    tests: [{ op: 'exact', collections: [{ fields: ['_id'] }] }],
+    { msg: 'Drag the _id field to the space below then click Test Schema to make your first collection' }],
+    fields: ['_id: ObjectId()'],
+    tests: [{ op: 'exact', collections: [{ fields: ['_id: ObjectId()'] }] }],
     congrats: "Great, now let's try adding multiple fields."
   }
 
@@ -20,9 +19,9 @@ function tutorialLevels (levelList) {
   const tutorialthree = {
     _id: 'tutorial_3',
     intro: [{ msg: 'A collection with only a single field is seldom useful.' },
-      { msg: 'Drag the _id field down then the other fields beneath it one at a time to create a collection with all the fields' }],
+      { msg: 'Drag the _id field down then the other fields <b>below</b> it one at a time to create a collection with all the fields' }],
     fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber'],
-    tests: [{ op: 'exact', collections: [{ fields: ['_id', 'CustomerId', 'Name', 'PhoneNumber'] }] }]
+    tests: [{ op: 'exact', collections: [{ fields: ['_id: ObjectId()', 'CustomerId', 'Name', 'PhoneNumber'] }] }]
   }
   levelList.push(tutorialthree)
 
@@ -30,10 +29,11 @@ function tutorialLevels (levelList) {
     _id: 'tutorial_2',
     intro: [{ msg: 'The _id field value is unique and always has an index to make it fast to retrieve by.' },
       { msg: 'Instead of a random ObjectId() we can store our own unique keys in _id.' },
-      { msg: 'Drag the _id field below then drag CustomerId on top to make a collection where CustomerId is the unique identifier then click "Test Schema"' }
+      { msg: 'Drag the _id field below then drag CustomerId <b>on top of it</b> to make a collection where CustomerId is the unique identifier then click "Test Schema"' }
     ],
     fields: ['_id: ObjectId()', 'CustomerID'],
-    tests: [{ op: 'exact', collections: [{ fields: ['CustomerID'] }] }]
+    tests: [{ op: 'exact', collections: [{ fields: ['CustomerID'] }] }],
+    flag: 'custom_id'
   }
   levelList.push(tutorialtwo)
 

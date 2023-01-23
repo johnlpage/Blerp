@@ -33,7 +33,7 @@ function dragEnd (dropX, dropY, text, isId) {
         break
       }
       // Dropping ON _id to replace it
-      if (idY < dropY < idY + fieldHeight && dropX > idX - 20 && dropX < idX + 80) {
+      if (app.flags.custom_id && idY < dropY < idY + fieldHeight && dropX > idX - 20 && dropX < idX + 80) {
         console.log('On')
         if (collection.fields.includes(text) === false) {
           collection.fields[0] = text
