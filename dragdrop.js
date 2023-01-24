@@ -64,6 +64,7 @@ function browserDragEnd (ev) {
   const boardEl = document.getElementById('board') /* May change to a board */
   const boardRect = boardEl.getBoundingClientRect()
   const elWidth = ev.target.getBoundingClientRect().width
+
   dropX = dropX - boardRect.left
   dropY = dropY - boardRect.top
 

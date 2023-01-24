@@ -1,253 +1,276 @@
-xdiv {
-    transition:  all 0.25s;
-  }
+:root {
+    --shadow: rgba(0, 0, 0, 0.2);
+    --menu-button: rgb(50,50,50);
+    --collection-three: olive;
+    --field-background: green;
+    --collection-two: darkblue;
+    --collection-five: brown;
+    --collection-four: purple;
+    --game-background: white;
+    --selected-item: red;
+    --light-text: white;
+    --dark-text: black;
+    --background-colour: ButtonFace;
+    --section-background:rgb(250, 250, 250);
 
-.game {
-    background-color: white;
-    /* Want mobile aspect even in browser */
-    width: min(70vh, 100vw);
-    margin: auto;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    top: 0px;
-    z-index: -1;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+    --simatlas-background: black;
+    --simatlas-border: green;
+    --simatlas-line: limegreen;
+    --simatlas-axis: white;
+    
+    --tech-font: monospace;
+    --tech-font-size:  min(1.5vh, 36pt);
+    
 }
 
-.indexheader {
-    margin:auto;
+
+body {
+    background-color: var(--background-colour);
+    user-select: none;
+    overflow: hidden;
+    margin: 0px;
+    padding: 0px;
+}
+
+
+/* Make things move smoothly */
+div {
+    transition: all 0.05s;
+}
+
+/* In a Browser - make it Mobile shaped */
+
+.game {
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+    background-color: var(--game-background);
+    width: min(70vh, 100vw);
+    flex-direction: column;
+    height: 100vh;
+    display: flex;
+    margin: auto;
+    z-index: -1;
+    top: 0px;
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.sectionheader {
     text-align: center;
-    padding: 1em;
+    margin: auto;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+   margin-bottom: 1em;
+   width: 100%;
+   position: relative;
+   display: inline-block;
 }
 
 .selectedindex {
-    border: 2px solid red;
-
+    border: 2px solid var(--selected-item);
 }
+
 .index {
-    display: inline-block;
-    background-color: blue;
-    color: white;
-    padding: 0.5em;
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-    margin-right: 1em;
-    margin-bottom: 1em;
+    background-color: var(--default-background);
+    color: var(--light-text);
+    display: inline-block;
     border-radius: 0.5em;
-    font-family: monospace;
+    margin-bottom: 1em;
     width: fit-content;
-    
-    position: relative;
+    margin-right: 1em;
+    padding: 0.5em;
 }
 
 .dialogbackground {
+    background-color: var(--shadow);
     position: absolute;
-    width: 100%;
     height: 100%;
+    width: 100%;
+    z-index: 9;
     left: 0;
     top: 0;
-    background-color: rgba(0, 0, 0, 0.2);
-    z-index: 9;
 }
 
-body {
-    overflow: hidden;
-    margin: 0;
-    background-color: ButtonFace;
-    font-size: min(1.5vh, 32pt);
-    -webkit-user-select: none;
-    /* Safari */
-    -ms-user-select: none;
-    /* IE 10 and IE 11 */
-    user-select: none;
-    /* Standard syntax */
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-}
+
+
+/* Top level flex sections */
 
 .menu {
-    display: flex;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+    background-color:var(--section-background); 
+    justify-content: flex-end;
     width: calc(100vw-10px);
+    margin: 5px 5px 5px 5px;
+    border-radius: 0.25em;
     padding-left: 0.25em;
     padding-top: 0.25em;
-    margin: 5px 5px 5px 5px;
-    justify-content: flex-end;
-    background-color: rgb(250, 250, 250);
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-    border-radius: 0.25em;
-
+    display: flex;
 }
 
 .pallette {
-    display: flex;
-    flex-wrap: wrap;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+    background-color: var(--section-background); 
+    margin: 5px 5px 5px 5px;
     width: calc(100%-10px);
+    border-radius: 0.25em;
     padding-left: 1em;
     padding-top: 1em;
-    margin: 5px 5px 5px 5px;
-    /* border: 1px solid black;*/
-    background-color: rgb(250, 250, 250);
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-    border-radius: 0.25em;
+    flex-wrap: wrap;
+
 }
 
-
 .board {
-    white-space: nowrap;
-    background-color: rgb(250, 250, 250);
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-    border-radius: 0.25em;
+    background-color: var(--section-background); 
     width: calc(100% - 10px);
     margin: 5px 5px 5px 5px;
-   flex: 1;
-   position: relative;
+    border-radius: 0.25em;
+    white-space: nowrap;
+    position: relative;
+    flex: 1;
+   
 }
 
 .indexes {
 
-    background-color: rgb(250, 250, 250);
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-    border-radius: 0.25em;
+    background-color: var(--section-background); 
     width: calc(100% - 10px);
     margin: 5px 5px 5px 5px;
+    border-radius: 0.25em;
+
+}
+
+.meanline {
+    stroke: blue;
+}
+
+
+
+/* Menu CSS */
+
+.gamebutton {
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+    background-color: var(--field-background); 
+    color: var(--light-text);
+    font-family: var(--tech-font);
+    font-size: var(--tech-font-size);
+    border-radius: 0.5em;
+    margin-bottom: 0.5em;
+    width: fit-content;
+    margin-right: 1em;
+    padding: 0.5em;
 }
 
 .menubutton {
-    display: inline-block;
-    background-color: #00684a;
-    color: white;
-    padding: 0 1em 0 1em;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-    margin-right: 1em;
-    margin-bottom: 0.25em;
-    border-radius: 0.25em;
-    font-family: monospace;
+    background-color: var(--menu-button); 
 }
 
 .pallette_field {
     display: inline-block;
-    background-color: #00ed64;
-    padding: 0.5em;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-    margin-right: 1em;
-    margin-bottom: 1em;
-    border-radius: 0.5em;
-    font-family: monospace;
+}
+
+.board_collection {
     width: fit-content;
+    block-size: fit-content;
+    position: absolute;
+ 
 }
 
 .board_field {
-    font-family: monospace;
     position: relative;
-    background-color: #00ed64;
-    padding: 0.5em;
-    border-radius: 0.5em;
-    width: fit-content;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-    color: white;
+   margin-bottom: 0px;
 }
 
 .drag_field {
-    font-family: monospace;
     position: absolute;
-    background-color: #00ed64;
-    padding: 0.5em;
-    border-radius: 0.5em;
-    width: fit-content;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-    z-index: 10
+    z-index: 99;
 }
-
-
 
 .deletebutton {
-    background-color: white;
-    border: 1px solid black;
-    width: 0.7em;
-    height: 1.2em;
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    color: black;
-    padding-top: 0.1em;
-    padding-left: 0.3em;
+    background-color: var(--game-background);
+    border: 1px solid var(--dark-text);
     padding-right: 0.2em;
+    padding-left: 0.3em;
+    padding-top: 0.1em;
     border-radius: 1em;
     position: absolute;
-    top: -0.75em;
     right: -0.75em;
-    z-index: 2;
+    height: 1.2em;
+    width: 0.7em;
+    color: var(--dark-text);
+    top: -0.75em;
+    z-index: 3;
 }
 
+.dialogclose {
+    z-index: 21;
+}
+
+/* Pop up Messages */
+
 .messagebubble {
-    background-color: white;
-    border: 3px solid black;
     font-size: min(3vh, 40pt);
+    background-color:  var(--game-background);
+    border: 3px solid var(--dark-text);
+    box-sizing: border-box;
     border-radius: 1em;
-    position: relative;
+    position: absolute;
     padding: 1em;
     z-index: 15;
     width: 80%;
     left: 10%;
-    box-sizing: border-box;
-
 }
 
+/* Atlas Simulator */
 .simulator {
-    left: 5%;
+    background-color: var(--simatlas-background);
+    border: 3px solid var(--simatlas-border);
     width: calc(90% - 2em);
-    top: 5%;
-    height: 60%;
-
-    background-color: black;
-    border: 3px solid green;
     border-radius: 1em;
-    position: relative;
+    position: absolute;
     padding: 1em;
-    z-index: 15;
-
+    height: 60%;
+    z-index: 20;
+    left: 5%;
+    top: 15%;
 }
 
 .line {
-    fill: none;
-    stroke: yellowgreen;
+    stroke: var(--simatlas-line);
     stroke-width: 3px;
+    fill: none;
 }
 
 .labels {
+    font-size: min(2.5vh, 32pt);
     color: white;
     z-index: 10;
-    font-size: min(2.5vh, 32pt);
-    ;
-
 }
 
 .yaxis {
-    color: white;
     stroke-width: 0;
+    color: var(--simatlas-axis);
 }
 
 .label {
-    float: left;
     margin-right: 1em;
-
+    float: left;
 }
 
 .value {
-    color: greenyellow
+    color: var(--simatlas-line);
 }
 
 .scrollgraph {
-    width: 100%;
     margin-top: 5%;
-    height: 70%
-}
-
-.old {
-    display: none
+    width: 100%;
+    height: 70%;
 }
 
 
-
-.board_collection {
-    width: fit-content;
-    position: absolute;
-    /* We can put something in here to show a whole collection if we want*/
-}

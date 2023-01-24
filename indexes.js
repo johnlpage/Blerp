@@ -3,6 +3,7 @@
 // eslint-disable-next-line no-unused-vars
 function addIndex (colidx, index) {
   console.log(`Add Index ${colidx} ${index}`)
+  
   // Create a new index
   const fname = app.collections[colidx].fields[index]
   console.log(app.collections)

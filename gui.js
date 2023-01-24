@@ -7,11 +7,11 @@ function onLoad () {
   const { createApp } = Vue
   app = createApp({
     // eslint-disable-next-line no-undef
-    methods: { browserDragStart, browserDragEnd, mobileDragStart, mobileDragEnd, mobileDrag, deleteField, closeMessage, addIndex, deleteIndex,selectIndex },
+    methods: { closeSim, testSchema, restartLevel, browserDragStart, browserDragEnd, mobileDragStart, mobileDragEnd, mobileDrag, deleteField, closeMessage, addIndex, deleteIndex, selectIndex },
     data () {
       return {
         selectedIndex: null,
-        colours: ['green', 'blue', 'purple'],
+        colours: ['var(--field-background)', 'var(--collection-two)', 'var(--collection-three)', 'var(--collection-four)', 'var(--collection-five)'],
         collections: [],
         fields: [],
         levels: [],
@@ -26,7 +26,7 @@ function onLoad () {
         flags: {},
         messageBubble: { msg: 'No Message', cb: null },
         showSimulator: false,
-        simulator: { data: null, line: null, x: null, graphtime: 0, cpu: 0, ram: 0, disk: 0, ops: 0, target: 0, vrange: 100, resolvefn: () => {} }
+        simulator: { opdesc: null, data: null, line: null, x: null, graphtime: 0, cpu: 0, ram: 0, disk: 0, ops: 0, target: 0, vrange: 100, resolvefn: () => {} }
       }
     }
   }).mount('#game')

@@ -8,7 +8,11 @@ const slideTime = 50
 const nPoints = 100
 
 function tickv () {
-  // TODO - Make CPU, RAM vary a little
+  if (Math.random() < 0.05) {
+    app.simulator.cpu = Math.floor(app.simulator.opdesc.cpu * (0.95 + Math.random() * 0.1))
+    app.simulator.disk = Math.floor(app.simulator.opdesc.iops * (0.95 + Math.random() * 0.1))
+    app.simulator.ops = Math.floor(app.simulator.opdesc.performance * (0.95 + Math.random() * 0.1))
+  }
 
   app.simulator.data.push(app.simulator.ops * (0.95 + Math.random() * 0.1))
 
@@ -34,13 +38,15 @@ function tickv () {
 // eslint-disable-next-line no-unused-vars
 function simulateOp (opdesc, resolve) {
   console.log(opdesc)
+  app.simulator.opdesc = opdesc
   app.simulator.target = opdesc.target
-  app.simulator.cpu = opdesc.cpu
-  app.simulator.ram = opdesc.ram
-  app.simulator.disk = opdesc.iops
   app.simulator.vrange = opdesc.vrange
   app.simulator.resolvefn = resolve
   app.simulator.graphtime = 400
+
+  app.simulator.cpu = opdesc.cpu
+  app.simulator.ram = opdesc.ram
+  app.simulator.disk = opdesc.iops
   app.simulator.ops = opdesc.performance
   testSim()
 }
@@ -112,12 +118,28 @@ async function testSim () {
     .style('font-family', 'sans-serif').select('.domain').remove()
 
   g.append('line')
-    .attr('class', 'mean-line')
-    .style('stroke', 'white')
+    .attr('class', 'meanline')
     .attr('x1', 0)
     .attr('x2', width)
     .attr('y1', y(app.simulator.target))
     .attr('y2', y(app.simulator.target))
+
+    g.append('line')
+    .attr('class', 'axisline')
+    .style('stroke', 'white')
+    .attr('x1', 0)
+    .attr('x2', width)
+    .attr('y1', y(0))
+    .attr('y2', y(0))
+
+    g.append('line')
+    .attr('class', 'axisline')
+    .style('stroke', 'white')
+    .attr('x1', 0)
+    .attr('x2', 0)
+    .attr('y1', 0)
+    .attr('y2', height)
+
 
   g.append('text')
     .text(`Target ${app.simulator.target}`)

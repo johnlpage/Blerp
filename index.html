@@ -20,26 +20,27 @@
 
 <body onLoad="onLoad()">
     <div id="game" class="game" :click="selectedIndex=null" >
+        <div class="container">
         <div id="menu" class="menu">
-            <div class="menubutton" id="testbutton" onclick="testSchema()">Test Schema</div>
-            <div class="menubutton" id="clearbutton" onclick="restartLevel()">Restart Level</div>
+            <div class="gamebutton menubutton" @click="testSchema()">Test Schema</div>
+            <div class="gamebutton  menubutton" @click="restartLevel()">Restart Level</div>
         </div>
         <div id="pallette" class="pallette">
             <div v-for='field in fields' @touchstart="mobileDragStart" @touchmove="mobileDrag" @touchend="mobileDragEnd"
-                @dragstart="browserDragStart" @dragend="browserDragEnd" draggable=true class='pallette_field'>
+                @dragstart="browserDragStart" @dragend="browserDragEnd" draggable=true class='gamebutton  pallette_field'>
                 {{field}}
             </div>
         </div>
 
         <!-- Fake field show in mobile/touch drag-->
-        <div v-if="dragField.visible" :style="{left: dragField.x+'px',top: dragField.y+'px'}" class="drag_field">
+        <div v-if="dragField.visible" :style="{left: dragField.x+'px',top: dragField.y+'px'}" class="gamebutton  drag_field">
             {{dragField.text}} </div>
 
         <div class="board" id="board">
-            <div class="indexheader"> Collections </div>
+            <div class="sectionheader" id="collectionheader"> Collections </div>
             <div v-for='(collection,colidx) in collections' class='board_collection'
                 :style="{left: collection.cX+'px',top: collection.cY+'px'}">
-                <div v-for="(field,index) in collection.fields" class="board_field" @click="addIndex(colidx,index)" :style="{'background-color': colours[colidx]}">
+                <div v-for="(field,index) in collection.fields" class="gamebutton  board_field" @click="addIndex(colidx,index)" :style="{'background-color': colours[colidx]}">
                     <template v-if="index === 0 && field !== fields[0]">_id: {{field}} </template>
                     <template v-else-if="collection.arrays.includes(field)">Array( {{field}} ) </template>
                     <template v-else> {{field}} </template>
@@ -49,15 +50,15 @@
         </div>
 
         <div v-if="indexes.length > 0" class="indexes" id="indexes">
-            <div class="indexheader"> Indexes </div>
-            <div v-for='(index,indexidx) in indexes' :class='{index:true, selectedindex: (index == selectedIndex)}' @click="selectIndex(indexidx)" :style="{'background-color': colours[index.collection]}">
+            <div class="sectionheader"> Indexes </div>
+            <div v-for='(index,indexidx) in indexes' :class='{gamebutton:true, index:true, selectedindex: (index == selectedIndex)}' @click="selectIndex(indexidx)" :style="{'background-color': colours[index.collection]}">
                 {{ index.fields}}
                 <div @click.stop="deleteIndex(indexidx)" class="deletebutton">X</div>
             </div>
         </div>
 
         <div v-show="showSimulator" id="simulator" class="simulator">
-            <div class="deletebutton" onclick.stop="closeSim()">X</div>
+            <div class="deletebutton dialogclose" @click.stop="closeSim()">X</div>
             <div class="labels">
                 <div class="label"> CPU (%): <span class="value" id="cpu">{{simulator.cpu}}</span></div>
                 <div class="label"> RAM (%): <span class="value" id="ram">{{simulator.ram}}</span></div>
@@ -71,8 +72,9 @@
         <div v-show="showDialog" id="dialogbackground" class="dialogbackground"></div>
 
         <div v-show="showMessageBubble" class="messagebubble" :style="{left: messageBubble.x +'%', top: messageBubble.y + '%' , width: messageBubble.w + '%'   }">
-            <div class="deletebutton" @click="closeMessage()">X</div>
+            <div class="deletebutton dislogclose" @click="closeMessage()">X</div>
             <span v-html="messageBubble.msg"></span>
         </div>
+    </div>
     </div>
 </body>
