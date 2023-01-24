@@ -6,10 +6,14 @@ https://johnlpage.github.io/Blerp/
 TODO List
 ----------
 ~~Rewrite HTML/Render uing Vue.js (Shoudl have done that to start with)~~
-Add 'Feature Enablement' flags
+~~Add 'Feature Enablement' flags~~
 ~~Fix 'Mobile Ratio' on browser~~
 
 Indexes GUI
+  Move Index Definition into collection definition!! (Why isn't it)
+
+Colours of collections change on delete as due to order
+
 Write speed simulation
     Covering Indexes
 Limited Arrays GUI

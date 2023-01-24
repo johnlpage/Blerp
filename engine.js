@@ -13,6 +13,7 @@
 //    Support for requiring a JOIN of some kind
 
 // This is an implementation of a interesting set of heuristics - see below
+/* global app */
 
 // eslint-disable-next-line no-unused-vars
 function perfTest (op, collections, constraints) {
@@ -23,7 +24,7 @@ function perfTest (op, collections, constraints) {
   if (op.op === 'exact') {
     /* Check we have exactly what is specified */
     /* Specifically for each list of fields we have a collection with that list
-    and the same first element */
+    and the same first element , this is only really for the tutorial levels */
 
     for (const testcollection of op.collections) {
       console.log('testing', JSON.stringify(testcollection))
@@ -115,7 +116,15 @@ function testFetchSpeed (collection, queryFields, projectFields, limit, constrai
   let iops = 5
   // This assumes that we have a collection with all the required query and projection fields
   // So it's either an indexed query, a pertially indexed query and scan or a collection scan
-  const availableIndexes = [[collection.fields[0]]] // This is _id , TODO - More indexes
+  const availableIndexes = [[collection.fields[0]]] // This is _id
+  // Add any indexes that are on this collection
+  console.log(collection)
+  console.log('ADDING INDEXES')
+  for (const index of collection.indexes) {
+    availableIndexes.push(index)
+    console.log(index)
+  }
+
   const nQueryFields = queryFields.length
   let bestCostPerOp = Infinity
   console.log(`Testing find and fetch of ${limit}`)

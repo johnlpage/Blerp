@@ -43,7 +43,7 @@ function simulateOp (opdesc, resolve) {
   app.simulator.vrange = opdesc.vrange
   app.simulator.resolvefn = resolve
   app.simulator.graphtime = 400
-
+  app.simulator.desc = opdesc.desc
   app.simulator.cpu = opdesc.cpu
   app.simulator.ram = opdesc.ram
   app.simulator.disk = opdesc.iops

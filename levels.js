@@ -84,28 +84,42 @@ function testLevels (levelList) {
 
   const indexdev = {
     _id: 'indexdev',
-    intro: [],
+    intro: [{ msg: 'Now we have new requirement, we need to be able to get Customer Details by CustomerId but also by their Phone number.' },
+      { msg: 'We could have two collections and the customer details in both using different values for _id but then we would be storing all the same data twice, which isn\'t sensible.' },
+      { msg: 'What we can do is create an additional index on the phone number field, this will make writing a little slower but reading much much faster.' },
+      { msg: 'To add an index just click on the field once you have added it to a collection.' }
+    ],
     fields: ['_id: ObjectId()', 'CustomerId', 'CustomerPhone', 'CustomerDetails'],
-    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { CustomerDetails: 1, CustomerId: 1 }, target: 3800, vrange: 5000 }],
-    flag: "indexes"
-  }
-  levelList.push(indexdev)
-
-  const beginner2 = {
-    _id: 'beginner_2',
-    intro: [{
-      msg: 'Now we have new requirement, we need to be able to get Customer Details by CustomerId but also by their Phone number.'
+    tests: [{
+      op: 'find',
+      desc: 'Fetch Customer details by Id',
+      query: { CustomerId: 1 },
+      limit: 1,
+      project: {
+        CustomerDetails: 1,
+        CustomerId: 1,
+        CustomerPhone: 1
+      },
+      target: 3800,
+      vrange: 5000
     },
     {
-      msg: 'We could have two collections and the customer details in both using different values for _id but then we would be storing all the same data twice, which isnt sensible.'
-    },
-    { msg: 'What we can do is create an additional index on the phone number field, this will make writing a little slower but reading much much faster.' }
-   ],
-    fields: ['_id: ObjectId()', 'CustomerId', 'CustomerDetails'],
-    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { CustomerDetails: 1, CustomerId: 1 }, target: 3800, vrange: 5000 }],
-    congrats: "Well done, by putting the CustomerId in the Id field it's much faster to retrieve as it has an index."
+      op: 'find',
+      desc: 'Fetch Customer details by Phone no.',
+      query: { CustomerPhone: 1 },
+      limit: 1,
+      project: {
+        CustomerDetails: 1,
+        CustomerId: 1,
+        CustomerPhone: 1
+      },
+      target: 3800,
+      vrange: 5000
+    }],
+    congrats: "Well done, by having an index on both CutomerId and CustomerPhone we can fetch data quickly.",
+    flag: 'index'
   }
-  levelList.push(beginner2)
+  levelList.push(indexdev)
 }
 
 // eslint-disable-next-line no-unused-vars

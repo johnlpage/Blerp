@@ -3,7 +3,7 @@
 function dragEnd (dropX, dropY, text, isId) {
   // We can drop _id anywhere, others only on an existing schema
   if (isId) {
-    app.collections.push({ cX: dropX, cY: dropY, arrays: [], fields: [text] })
+    app.collections.push({ cX: dropX, cY: dropY, arrays: [], fields: [text], indexes: [] })
 
     // Make everything draggable now
   } else {

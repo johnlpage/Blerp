@@ -2,26 +2,26 @@
 
 // eslint-disable-next-line no-unused-vars
 function addIndex (colidx, index) {
-  console.log(`Add Index ${colidx} ${index}`)
-  
-  // Create a new index
   const fname = app.collections[colidx].fields[index]
-  console.log(app.collections)
-  console.log(app.selectedIndex)
-  if (app.selectedIndex && colidx === app.selectedIndex.collection && app.selectedIndex.fields.includes(fname) === false) {
-    app.selectedIndex.fields.push(fname)
+  console.log(`Add Index ${colidx} ${index} ${fname}`)
+  console.log(JSON.stringify(app.selectedIndex))
+  if (app.selectedIndex && app.collections[colidx] === app.selectedIndexCollection && app.selectedIndex.includes(fname) === false) {
+    app.selectedIndex.push(fname)
   } else {
-    app.indexes.push({ collection: colidx, fields: [fname] })
+    app.collections[colidx].indexes.push([fname])
+    console.log(app.collections)
   }
 }
 // eslint-disable-next-line no-unused-vars
-function deleteIndex (indexidx) {
-  app.indexes.splice(indexidx, 1)
+function deleteIndex (colidx, indexidx) {
+  app.collections[colidx].indexes.splice(indexidx, 1)
   app.selectedIndex = null
 }
 
 // eslint-disable-next-line no-unused-vars
-function selectIndex (indexidx) {
-  console.log(`Select index ${indexidx}`)
-  app.selectedIndex = app.indexes[indexidx]
+function selectIndex (colidx, indexidx) {
+  console.log(colidx, indexidx)
+  console.log(JSON.stringify(app.collections))
+  app.selectedIndex = app.collections[colidx].indexes[indexidx]
+  app.selectedIndexCollection = app.collections[colidx]
 }

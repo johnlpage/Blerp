@@ -49,24 +49,30 @@
             </div>
         </div>
 
-        <div v-if="indexes.length > 0" class="indexes" id="indexes">
-            <div class="sectionheader"> Indexes </div>
-            <div v-for='(index,indexidx) in indexes' :class='{gamebutton:true, index:true, selectedindex: (index == selectedIndex)}' @click="selectIndex(indexidx)" :style="{'background-color': colours[index.collection]}">
-                {{ index.fields}}
-                <div @click.stop="deleteIndex(indexidx)" class="deletebutton">X</div>
-            </div>
+     
+        <div v-if="flags.index" class="indexes" id="indexes"> 
+            <div class="sectionheader"> Additional Indexes </div>
+            <template v-for='(collection,colidx) in collections'>
+                <div v-for='(index, indexidx) in collection.indexes' :class='{gamebutton:true, index:true, selectedindex: (index == selectedIndex)}' @click="selectIndex(colidx,indexidx)" :style="{'background-color': colours[colidx]}">
+                    {{ index}}
+                    <div @click.stop="deleteIndex(colidx,indexidx)" class="deletebutton">X</div>
+                </div>
+            </template>
         </div>
 
         <div v-show="showSimulator" id="simulator" class="simulator">
             <div class="deletebutton dialogclose" @click.stop="closeSim()">X</div>
+           
             <div class="labels">
+               
                 <div class="label"> CPU (%): <span class="value" id="cpu">{{simulator.cpu}}</span></div>
                 <div class="label"> RAM (%): <span class="value" id="ram">{{simulator.ram}}</span></div>
                 <div class="label"> Disk Util. (%): <span class="value" id="disk">{{simulator.disk}}</span></div>
-                <div style="clear:left" class="label"> Transactions /s: <span class="value" id="ops">{{simulator.ops}}</span></div>
-                <div class="label"> Target Transactions. /s: <span class="value" id="target">{{simulator.target}}</span></div>
+              
+                <div style="clear:left"  class="label"> Target ops/s: <span class="value" id="target">{{simulator.target}}</span></div>
             </div>
             <svg class="scrollgraph" id="simchart" ref="simchart"></svg>
+            <div class="testdesc"> Measuring: {{simulator.desc}} - {{simulator.ops}} ops/s </div>
         </div>
 
         <div v-show="showDialog" id="dialogbackground" class="dialogbackground"></div>

@@ -41,7 +41,7 @@ function onLoad () {
 function messageBubble (prompt, cb) {
   let { x, y, w, h, msg } = prompt
   if (x === undefined) x = 5
-  if (y === undefined) y = 10
+  if (y === undefined) y = 20
   if (w === undefined) w = 90
   if (h === undefined) h = 12
   app.messageBubble.x = x
@@ -74,6 +74,7 @@ async function testSchema () {
         // Show the performance
         // eslint-disable-next-line no-undef
         testOutcome.vrange = test.vrange ? test.vrange : 12000
+        testOutcome.desc = test.desc
         await new Promise((resolve) => { simulateOp(testOutcome, resolve) }) /* global simulateOp */
         // And fail if we have to
         if (testOutcome.performance < testOutcome.target) {
