@@ -29,18 +29,14 @@ function tickv () {
       .attr('transform', 'translate(' + app.simulator.x(0) + ',0)')
       .transition()
       .on('start', tickv)
-  } else {
-    console.log(
-      app.simulator.data)
   }
 }
 
 // eslint-disable-next-line no-unused-vars
 function simulateOp (opdesc, resolve) {
-  console.log(opdesc)
   app.simulator.opdesc = opdesc
   app.simulator.target = opdesc.target
-  app.simulator.vrange = opdesc.vrange
+  app.simulator.vrange = Math.floor(Math.max(opdesc.target, opdesc.performance) * 1.2)
   app.simulator.resolvefn = resolve
   app.simulator.graphtime = 400
   app.simulator.desc = opdesc.desc
@@ -77,10 +73,9 @@ async function testSim () {
   const margin = { top: 20, right: 10, bottom: 10, left: 10 }
   const width = +simChartElement.clientWidth - margin.left - margin.right
   const height = +simChartElement.clientHeight - margin.top - margin.bottom
-  console.log(width, height)
 
   const g = simChart.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-  console.log(g)
+
   // isHorizontal=true
 
   app.simulator.x = d3.scaleLinear()
@@ -106,8 +101,6 @@ async function testSim () {
     .attr('width', width)
     .attr('height', height)
 
-  console.log(app.simulator.data)
-
   // Append group and insert axis
   g.append('g')
     .call(yAxis)
@@ -124,7 +117,7 @@ async function testSim () {
     .attr('y1', y(app.simulator.target))
     .attr('y2', y(app.simulator.target))
 
-    g.append('line')
+  g.append('line')
     .attr('class', 'axisline')
     .style('stroke', 'white')
     .attr('x1', 0)
@@ -132,14 +125,13 @@ async function testSim () {
     .attr('y1', y(0))
     .attr('y2', y(0))
 
-    g.append('line')
+  g.append('line')
     .attr('class', 'axisline')
     .style('stroke', 'white')
     .attr('x1', 0)
     .attr('x2', 0)
     .attr('y1', 0)
     .attr('y2', height)
-
 
   g.append('text')
     .text(`Target ${app.simulator.target}`)

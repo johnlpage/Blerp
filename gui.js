@@ -1,6 +1,5 @@
 let app
 /* global Vue */
-const TESTING = false
 
 // eslint-disable-next-line no-unused-vars
 function onLoad () {
@@ -51,7 +50,7 @@ function messageBubble (prompt, cb) {
   app.messageBubble.h = h
 
   app.messageBubble.msg = msg
-  console.log(cb)
+
   app.messageBubble.cb = cb
   app.showMessageBubble = true
   app.showDialog = true
@@ -94,6 +93,7 @@ async function testSchema () {
 // eslint-disable-next-line no-unused-vars
 function restartLevel () {
   console.log('restart')
+  localStorage.removeItem(app.levels[app.currentLevelNo]._id)
   app.currentLevelNo--
   startNextLevel()
 }
@@ -101,7 +101,6 @@ function restartLevel () {
 function startNextLevel () {
   clearSchema()
   app.currentLevelNo++
-  app.fields = []
   app.colno = 0
   startLevel(app.currentLevelNo)
 }
@@ -128,31 +127,31 @@ function showIntro (level) {
 
 function startLevel (levelNo) {
   app.selectedIndex = null
-  let level = app.levels[levelNo]
-  // Skip completed levels
-  console.log(level)
-  if (level.flag) {
-    app.flags[level.flag] = true
-    console.log(`Enabled: ${level.flag}`)
-  }
-  while (localStorage.getItem(level._id) && !TESTING) {
-    console.log(`Skipping ${level._id} as alreadly complete`)
-    app.currentLevelNo++
-    level = app.levels[app.currentLevelNo]
 
-    if (level === undefined) {
-      messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: "You have completed all levels, thank's for playing. Go try out the real thing now" }, () => { console.log('Byee'); window.location.replace('http://cloud.mongodb.com') })
-      return
-    }
+  let level = app.levels[levelNo]
+
+  /* Skip completed levels */
+  while (level && localStorage.getItem(level._id)) {
     if (level.flag) {
       app.flags[level.flag] = true
-      console.log(`Enabled: ${level.flag}`)
     }
+    app.currentLevelNo++
+    level = app.levels[app.currentLevelNo]
+  }
+
+  if (level === undefined) {
+    app.currentLevelNo--
+    messageBubble({ msg: 'Retrying last level for development purposes' }, restartLevel)
+    // messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: "You have completed all levels, thank's for playing. Go try out the real thing now" }, () => { console.log('Byee'); window.location.replace('http://cloud.mongodb.com') })
+    return
+  }
+
+  if (level.flag) {
+    app.flags[level.flag] = true
   }
 
   console.log(`Starting Level ${level._id}`)
   app.currentLevel = level
-
   app.fields = level.fields
   level.prompt = 0
   showIntro(level)
@@ -163,6 +162,12 @@ function deleteField (collectionidx, fieldidx) {
   if (fieldidx === 0) {
     app.collections.splice(collectionidx, 1)
   } else {
+    const fname = app.collections[collectionidx].fields[fieldidx]
+    const arrayIdx = app.collections[collectionidx].arrays.indexOf(fname)
+    if (arrayIdx !== -1) {
+      // Remove it from arrays if it's there too
+      app.collections[collectionidx].arrays.splice(arrayIdx, 1)
+    }
     app.collections[collectionidx].fields.splice(fieldidx, 1)
   }
 }

@@ -12,14 +12,35 @@ TODO List
 ~~Indexes GUI~~
   ~~Move Index Definition into collection definition!! (Why isn't it)~~
 
-BUG: Colours of collections change on delete as due to order
+~~BUG: Colours of collections change on delete as due to order~~
 
-Using Indexes
-Covering Indexes
-Write speed simulation
+N.B - requests per second versus Docs/s ??
+Do we talk about network latency??
+
+Using Indexes (Wed)
+Covering Indexes (Wed)
+  - ~~Perect indexing~~
+  - ~~Index Partially matches, requires fetch~~
+  - ~~Index matches with extra index lookups~~
+
+Write speed simulation (Wed)
+  - Cost of write (doc + nindexes*0.1)
+
+Hardware constraints (Thur)
+  - Compute Data and Index sizes & working set
+  - Add read/write costs if WS > RAM
+  
+Create Good Levels (Fri)
+ 
+ // V1 covers basics of arrays and indexing , not more complex schemas */
+
+
 Limited Arrays GUI
-Concept of JOINs
+  - How to define an array as 'cache'
+  - How to account for a 'cached' query (some percentage)
 
+Concept of JOINs
+  - Ability to satisfy with >1 Collection
 
 Suggestions
 ------------

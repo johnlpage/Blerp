@@ -78,7 +78,7 @@ function testLevels (levelList) {
     }],
     fields: ['_id: ObjectId()', 'CustomerId', 'CustomerDetails'],
     tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { CustomerDetails: 1, CustomerId: 1 }, target: 3800, vrange: 5000 }],
-    congrats: "Well done, by putting the CustomerId in the Id field it's much faster to retrieve as it has an index."
+    congrats: "Well done, by putting the CustomerId in the _id field it's much faster to retrieve as that has an index."
   }
   levelList.push(beginner1)
 
@@ -97,11 +97,10 @@ function testLevels (levelList) {
       limit: 1,
       project: {
         CustomerDetails: 1,
-        CustomerId: 1,
-        CustomerPhone: 1
+        CustomerId: 1
       },
       target: 3800,
-      vrange: 5000
+      vrange: 15000
     },
     {
       op: 'find',
@@ -114,12 +113,106 @@ function testLevels (levelList) {
         CustomerPhone: 1
       },
       target: 3800,
-      vrange: 5000
+      vrange: 15000
     }],
-    congrats: "Well done, by having an index on both CutomerId and CustomerPhone we can fetch data quickly.",
+    congrats: 'Well done, by having an index on both CutomerId and CustomerPhone we can fetch data quickly.',
     flag: 'index'
   }
   levelList.push(indexdev)
+
+  const compounddev = {
+    _id: 'compoundindex',
+    intro: [{ msg: 'If you have multiple conditions in your query, you want an index that includes both of them this is called a compound index.' },
+      { msg: 'You can add fields to an existing index by clicking on the index, then the fied to add.' },
+      { msg: 'We\'ve decided we want to fetch CustomerDetails by City and State so create an index for that' },
+      { msg: 'Try to get it so we can fetch our customer details at 3,800 calls per second' }
+    ],
+    fields: ['_id: ObjectId()', 'City', 'State', 'CustomerDetails'],
+    tests: [{
+      op: 'find',
+      desc: 'Fetch Customer details by City and State',
+      query: { City: 1, State: 1 },
+      limit: 1,
+      project: {
+        CustomerDetails: 1
+      },
+      target: 3800,
+      vrange: 5000,
+      flag: 'compound'
+    }]
+  }
+
+  levelList.push(compounddev)
+
+  const compoundindexmulti = {
+    _id: 'compoundindexmulti',
+
+    intro: [{ msg: 'An index can only be used if the first field in the index is in the query. Create indexes so we can query by city, state or both.' }
+    ],
+    fields: ['_id: ObjectId()', 'City', 'State', 'CustomerDetails'],
+    tests: [{
+      op: 'find',
+      desc: 'Fetch Customer details by City and State',
+      query: { City: 1, State: 1 },
+      limit: 1,
+      project: {
+        CustomerDetails: 1
+      },
+      target: 3800,
+      vrange: 5000,
+      flag: 'compound'
+    },
+    {
+      op: 'find',
+      desc: 'Fetch Customer details  State',
+      query: { State: 1 },
+      limit: 1,
+      project: {
+        CustomerDetails: 1
+      },
+      target: 3800,
+      vrange: 5000,
+      flag: 'compound'
+    },
+    {
+      op: 'find',
+      desc: 'Fetch Customer details by City ',
+      query: { City: 1 },
+      limit: 1,
+      project: {
+        CustomerDetails: 1
+      },
+      target: 3800,
+      vrange: 5000
+
+    }],
+    flag: 'compound'
+  }
+
+  levelList.push(compoundindexmulti)
+
+  const covered1 = {
+    _id: 'covered1',
+
+    intro: [{ msg: 'If all the fieds we need to retrieve are in the index as well as the ones we query on we have a  "covered" query which is much faster, put City, State and CustomerDetails into the index to see this' },
+      { msg: 'This can make your indexes very large though, requiring more RAM as we will see in the next set of levels' }
+
+    ],
+    fields: ['_id: ObjectId()', 'City', 'State', 'CustomerDetails'],
+    tests: [{
+      op: 'find',
+      desc: 'Fetch Customer details by City and State',
+      query: { City: 1, State: 1 },
+      limit: 1,
+      project: {
+        CustomerDetails: 1
+      },
+      target: 10000,
+      vrange: 5000
+    }]
+  }
+
+  levelList.push(covered1)
 }
 
 // eslint-disable-next-line no-unused-vars

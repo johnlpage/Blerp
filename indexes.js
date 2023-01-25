@@ -20,6 +20,7 @@ function deleteIndex (colidx, indexidx) {
 
 // eslint-disable-next-line no-unused-vars
 function selectIndex (colidx, indexidx) {
+  if (!app.flags.compound) return
   console.log(colidx, indexidx)
   console.log(JSON.stringify(app.collections))
   app.selectedIndex = app.collections[colidx].indexes[indexidx]
