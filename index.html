@@ -40,7 +40,7 @@
             <div class="sectionheader" id="collectionheader"> Collections </div>
             <div v-for='(collection,colidx) in collections' class='board_collection'
                 :style="{left: collection.cX+'px',top: collection.cY+'px'}">
-                <div v-for="(field,index) in collection.fields" class="gamebutton  board_field" @click="addIndex(colidx,index)" :style="{'background-color': colours[colidx]}">
+                <div v-for="(field,index) in collection.fields" class="gamebutton  board_field" @click="addIndex(colidx,index)" :style="{'background-color': colours[collection.color]}">
                     <template v-if="index === 0 && field !== fields[0]">_id: {{field}} </template>
                     <template v-else-if="collection.arrays.includes(field)">Array( {{field}} ) </template>
                     <template v-else> {{field}} </template>
@@ -53,7 +53,7 @@
         <div v-if="flags.index" class="indexes" id="indexes"> 
             <div class="sectionheader"> Additional Indexes </div>
             <template v-for='(collection,colidx) in collections'>
-                <div v-for='(index, indexidx) in collection.indexes' :class='{gamebutton:true, index:true, selectedindex: (index == selectedIndex)}' @click="selectIndex(colidx,indexidx)" :style="{'background-color': colours[colidx]}">
+                <div v-for='(index, indexidx) in collection.indexes' :class='{gamebutton:true, index:true, selectedindex: (index == selectedIndex)}' @click="selectIndex(colidx,indexidx)" :style="{'background-color': colours[collection.color]}">
                     {{ index}}
                     <div @click.stop="deleteIndex(colidx,indexidx)" class="deletebutton">X</div>
                 </div>

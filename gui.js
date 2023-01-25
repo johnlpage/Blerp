@@ -10,6 +10,7 @@ function onLoad () {
     methods: { closeSim, testSchema, restartLevel, browserDragStart, browserDragEnd, mobileDragStart, mobileDragEnd, mobileDrag, deleteField, closeMessage, addIndex, deleteIndex, selectIndex },
     data () {
       return {
+        colno: 0,
         selectedIndex: null,
         colours: ['var(--field-background)', 'var(--collection-two)', 'var(--collection-three)', 'var(--collection-four)', 'var(--collection-five)'],
         collections: [],
@@ -101,6 +102,7 @@ function startNextLevel () {
   clearSchema()
   app.currentLevelNo++
   app.fields = []
+  app.colno = 0
   startLevel(app.currentLevelNo)
 }
 

@@ -9,13 +9,14 @@ TODO List
 ~~Add 'Feature Enablement' flags~~
 ~~Fix 'Mobile Ratio' on browser~~
 
-Indexes GUI
-  Move Index Definition into collection definition!! (Why isn't it)
+~~Indexes GUI~~
+  ~~Move Index Definition into collection definition!! (Why isn't it)~~
 
-Colours of collections change on delete as due to order
+BUG: Colours of collections change on delete as due to order
 
+Using Indexes
+Covering Indexes
 Write speed simulation
-    Covering Indexes
 Limited Arrays GUI
 Concept of JOINs
 

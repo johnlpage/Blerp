@@ -37,10 +37,6 @@ body {
 }
 
 
-/* Make things move smoothly */
-div {
-    transition: all 0.05s;
-}
 
 /* In a Browser - make it Mobile shaped */
 
