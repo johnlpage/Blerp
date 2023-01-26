@@ -1,33 +1,70 @@
 // This function estimates the performanc of the given query using the supplied schrma
 // and the constraints object supplied
 
-// TODO - Outline/Plan to werite this code
-// Find
-//    Identify any usable collections
-//    Using _id Index versus collscan
-//    Using Partial Index Prefix
-//    Using Partial Impact prex + other fields
-//    Impact of a covering index
-//    Impact of %tage reads not from cache
-//    Support for variable IOPS
-//    Support for requiring a JOIN of some kind
-
 // This is an implementation of a interesting set of heuristics - see below
+
+/* Calculate a value as to what percentage of operations are a cache miss */
+/* This will relate to how much larger the working set is than the cache */
+/* It's prety naieve as it assumes all collections are used and all indexes are used */
+/* Being out of cache impacts writes as well as reads */
+const C_AVG_ARRAY_SIZE = 30
+const C_FIELD_SIZE = 1
+const C_DETAIL_FIELD_SIZE = 20
+const C_COLLECTION_SIZE = 1000000
+
+const explainPlan = []
+
+
+function calcDataSize (collections, constraints) {
+  let dataSize = 0
+  for (const c of collections) {
+    let colSize = 0
+    let idxSize = 0
+    for (const f of c.fields) {
+      let fsize = C_FIELD_SIZE /* 1 Standard Field */
+      if (f.includes('Details')) { fsize = C_DETAIL_FIELD_SIZE } /* A fieldname that is 'Details' is considered to be larger */
+      if (c.arrays.includes(f)) { fsize = fsize * C_AVG_ARRAY_SIZE }
+      colSize += fsize
+    }
+    dataSize += colSize
+    // Work out the index size
+    for (const i of c.indexes) {
+      for (const f of i) {
+        let fsize = C_FIELD_SIZE /* 1 Standard Field in index */
+        if (f.includes('Details')) { fsize = C_DETAIL_FIELD_SIZE }
+        if (c.arrays.includes(f)) { fsize = fsize * C_AVG_ARRAY_SIZE }
+        idxSize += fsize
+      }
+      dataSize += idxSize
+    }
+  }
+  logExplain(`Calculated Data Size ${dataSize}`)
+  /* A fieldname that is 'Details' is considered to be larger */
+  return dataSize
+}
+
+function logExplain(msg) {
+  explainPlan.push(JSON.stringify(msg))
+}
 
 // eslint-disable-next-line no-unused-vars
 function perfTest (op, collections, constraints) {
-  console.log('Testing performance')
-  console.log(JSON.stringify(op))
+  // console.log('Testing performance')
+  // console.log(JSON.stringify(op))
 
   let opResult
+  explainPlan.length=0;
 
   if (op.op === 'exact') {
     return exactTest(op, collections, constraints)
   }
 
+  const dataSize = calcDataSize(collections)
+
   if (op.op === 'find') {
+    logExplain(op)
     opResult = findPerfTest(op, collections, constraints)
-    console.log(opResult)
+    logExplain(opResult)
     if (opResult.possible === false) {
       return { msg: 'It\'s not possible to perform the operations with that schema', ok: false }
     }
@@ -36,7 +73,7 @@ function perfTest (op, collections, constraints) {
 
     return { msg: `Operations type ${op.op} is not supported`, ok: false }
   }
-
+  console.log(explainPlan.join('\n'))
   return opResult
 }
 
@@ -87,14 +124,13 @@ function findPerfTest (op, collections, constraints) {
   // They don't all need to be in the same collection - as long as there is a way to join them
   // A join will hurt though especially if not indexed
 
-  let limit = 101
+  let limit = 1; /* By default we fectch a single document */
   if (op.limit > 0) { limit = op.limit }
 
   const queryFields = Object.keys(op.query) /* For now assuming exact match */
-
   const projectFields = Object.keys(op.project)
 
-  console.log(`Query by ${queryFields}, Fetch: ${projectFields}`)
+  // console.log(`Query by ${queryFields}, Fetch: ${projectFields}`)
 
   const requiredFields = new Set([...queryFields, ...projectFields]) /* We need to get all of these from one collection for now */
 
@@ -107,12 +143,12 @@ function findPerfTest (op, collections, constraints) {
 
   for (const collection of collections) {
     const cFields = collection.fields
-    console.log(`Collection: ${cFields}`)
+    // console.log(`Collection: ${cFields}`)
 
     if (arrayContainsSet(cFields, requiredFields)) {
-      console.log('Collection has all required fields')
+      // console.log('Collection has all required fields')
       const fetchCost = testFetchSpeed(collection, queryFields, projectFields, limit, constraints)
-      console.log(`With ${collection.fields} - performance is ${fetchCost.cost}`)
+      // console.log(`With ${collection.fields} - performance is ${fetchCost.cost}`)
       if (fetchCost.cost < bestPerf.cost) {
         bestPerf = fetchCost
       }
@@ -143,23 +179,21 @@ function testFetchSpeed (collection, queryFields, projectFields, limit, constrai
   // So it's either an indexed query, a pertially indexed query and scan or a collection scan
   const availableIndexes = [[collection.fields[0]]] // This is _id
   // Add any indexes that are on this collection
-  console.log(collection)
-  console.log('ADDING INDEXES')
+
   for (const index of collection.indexes) {
     availableIndexes.push(index)
-    console.log(index)
   }
 
   const nQueryFields = queryFields.length
   let bestCostPerOp = Infinity
-  console.log(`Testing find and FETCH of ${limit} documents`)
+
   for (const index of availableIndexes) {
     // Does it start with ALL of the query fields (Which can be in any order) - Perfect index
     let costPerOp = 0
 
     const { indexPrefix, indexedFields } = termsInIndex(queryFields, index)
 
-    console.log(`Can use ${indexPrefix} prefix fields and ${indexedFields} total of ${nQueryFields} required`)
+    // console.log(`Can use ${indexPrefix} prefix fields and ${indexedFields} total of ${nQueryFields} required`)
 
     // Compute index efficiency
     // Perfect index = 1
@@ -173,21 +207,22 @@ function testFetchSpeed (collection, queryFields, projectFields, limit, constrai
       fetchEfficiency = 1
     } else {
       if (indexPrefix > 0) {
-        indexEfficiency = C_INDEX_CARDINALITY  /* Basically 10X the ammount of work but can use index */
-        fetchEfficiency = C_INDEX_CARDINALITY  /* Have to fetch more */
+        indexEfficiency = C_INDEX_CARDINALITY /* Basically 10X the ammount of work but can use index */
+        fetchEfficiency = C_INDEX_CARDINALITY /* Have to fetch more */
         if (indexedFields === nQueryFields) {
           /* Unexpectedly good as we have more index reads but no extra doc reads */
-          indexEfficiency = C_INDEX_CARDINALITY 
+          indexEfficiency = C_INDEX_CARDINALITY
           fetchEfficiency = 1
         }
       }
     }
 
-    console.log(`indexRatio: ${indexEfficiency}, fetchRatio: ${fetchEfficiency}`)
+    // console.log(`indexRatio: ${indexEfficiency}, fetchRatio: ${fetchEfficiency}`)
     /* If the index covers all the projected fields too then no need to fetch is free */
     let covered = true
     for (const pField of projectFields) {
-      console.log(`Additional fields to check if covered ${projectFields}`)
+      // console.log(`Additional fields to check if covered ${projectFields}`)
+      // Check not array too
       if (!index.includes(pField) || collection.arrays.includes[pField]) {
         covered = false
       }
@@ -202,7 +237,7 @@ function testFetchSpeed (collection, queryFields, projectFields, limit, constrai
       costPerOp = C_MEM_INDEXFETCH * limit * indexEfficiency
 
       if (!covered) {
-        console.log('Query is indexed but not covered')
+        // console.log('Query is indexed but not covered')
         costPerOp += C_MEM_DOCFETCH * limit * fetchEfficiency
       } else {
         console.log('Query is covered')
@@ -218,17 +253,18 @@ function testFetchSpeed (collection, queryFields, projectFields, limit, constrai
       iops = 99
       ram = 50
 
-      console.log('Query is collection scan')
+      // console.log('Query is collection scan')
       costPerOp = C_MEM_COLLECTIONSCAN // TODO - Change this to relative to collection size
       // TODO - Make this 100% disk use and high CPU
     }
-    console.log(costPerOp)
+    // console.log(costPerOp)
     // If it's less than we have partial indexing˘
     if (costPerOp <= bestCostPerOp) {
       bestCostPerOp = costPerOp
     }
   }
-  return { cost: bestCostPerOp / limit , cpu, ram, iops }
+
+  return { cost: bestCostPerOp, cpu, ram, iops }
 }
 
 function exactTest (op, collections, constraints) {
