@@ -2,6 +2,14 @@ Live at:
 
 https://johnlpage.github.io/Blerp/
 
+Challenges
+-----------
+
+How do I express a test beyond time to retrieve a single doc, i.e. time to retrieve
+all Orders for a Customer where that may not be 1:1 with documents if using Join or Array
+
+
+
 
 TODO List
 ----------
@@ -22,6 +30,7 @@ Covering Indexes (Wed)
   - ~~Perect indexing~~
   - ~~Index Partially matches, requires fetch~~
   - ~~Index matches with extra index lookups~~
+  - Working Set / Disk speed
 
 Write speed simulation (Wed)
   - Cost of write (doc + nindexes*0.1)

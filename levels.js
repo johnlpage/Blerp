@@ -73,11 +73,11 @@ function testLevels (levelList) {
      - we need to be able to fetch our customers details by CustomerId. We have tens of thousands of customers.`
     },
     {
-      msg: `The business estimates we need to fetch 3800 records per second at peak, and we are running on an 
+      msg: `The business estimates we need to fetch 2000 records per second at peak, and we are running on an 
      Atlas M10 hosted instance - which has 1 CPU , 2GB RAM and a reasonably fast disk. `
     }],
     fields: ['_id: ObjectId()', 'CustomerId', 'CustomerDetails'],
-    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { CustomerDetails: 1, CustomerId: 1 }, target: 3800, vrange: 5000 }],
+    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { CustomerDetails: 1, CustomerId: 1 }, target: 2000, vrange: 5000 }],
     congrats: "Well done, by putting the CustomerId in the _id field it's much faster to retrieve as that has an index."
   }
   levelList.push(beginner1)
@@ -99,7 +99,7 @@ function testLevels (levelList) {
         CustomerDetails: 1,
         CustomerId: 1
       },
-      target: 3800,
+      target: 2000,
       vrange: 15000
     },
     {
@@ -112,7 +112,7 @@ function testLevels (levelList) {
         CustomerId: 1,
         CustomerPhone: 1
       },
-      target: 3800,
+      target: 2000,
       vrange: 15000
     }],
     congrats: 'Well done, by having an index on both CutomerId and CustomerPhone we can fetch data quickly.',
@@ -136,7 +136,7 @@ function testLevels (levelList) {
       project: {
         CustomerDetails: 1
       },
-      target: 3800,
+      target: 2000,
       vrange: 5000,
       flag: 'compound'
     }]
@@ -158,7 +158,7 @@ function testLevels (levelList) {
       project: {
         CustomerDetails: 1
       },
-      target: 3800,
+      target: 2000,
       vrange: 5000,
       flag: 'compound'
     },
@@ -170,7 +170,7 @@ function testLevels (levelList) {
       project: {
         CustomerDetails: 1
       },
-      target: 3800,
+      target: 2000,
       vrange: 5000,
       flag: 'compound'
     },
@@ -182,7 +182,7 @@ function testLevels (levelList) {
       project: {
         CustomerDetails: 1
       },
-      target: 3800,
+      target: 2000,
       vrange: 5000
 
     }],
@@ -193,22 +193,23 @@ function testLevels (levelList) {
 
   const covered1 = {
     _id: 'covered1',
-
-    intro: [{ msg: 'If all the fieds we need to retrieve are in the index as well as the ones we query on we have a  "covered" query which is much faster, put City, State and CustomerDetails into the index to see this' },
+    intro:[],
+    real_intro: [{ msg: 'If all the fields we need to retrieve are in the index as well as the ones we query on we have a  "covered" query which is much faster, put City, State and CustomerDetails into the index to see this' },
       { msg: 'This can make your indexes very large though, requiring more RAM as we will see in the next set of levels' }
 
     ],
     fields: ['_id: ObjectId()', 'City', 'State', 'CustomerDetails'],
+    cachesize: 100, /* Quantuty of available cache */
+    ndocs: 100, /* Number of docs in working set */
     tests: [{
       op: 'find',
       desc: 'Fetch Customer details by City and State',
       query: { City: 1, State: 1 },
-      limit: 1,
+      limit: 101, /* How many to retrieve */
       project: {
         CustomerDetails: 1
       },
-      target: 10000,
-      vrange: 5000
+      target: 10000 /* Required Speed */
     }]
   }
 

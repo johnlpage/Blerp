@@ -59,12 +59,12 @@ function messageBubble (prompt, cb) {
 // eslint-disable-next-line no-unused-vars
 async function testSchema () {
   // TODO - Check if level passed
-  console.log('Check Schema')
+
   const { tests } = app.currentLevel
   for (const test of tests) {
     // eslint-disable-next-line no-undef
     const testOutcome = perfTest(test, app.collections)
-    console.log(testOutcome)
+   
     if (testOutcome.ok === false) {
       /* We cannot use this schema at all */
       messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: testOutcome.msg }, () => {})

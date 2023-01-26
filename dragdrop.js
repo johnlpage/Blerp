@@ -7,7 +7,6 @@ function dragEnd (dropX, dropY, text, isId) {
     app.colno++
     // Make everything draggable now
   } else {
-    console.log('Not ID')
     // Can only drop a non _id field under a collection
     // Iterate in order of ypos
     for (const collection of [...app.collections].sort((a, b) => { return b.cY - a.cY })) {
@@ -24,7 +23,6 @@ function dragEnd (dropX, dropY, text, isId) {
         } else {
           // Dropping twice makes this an array
           if (app.flags.arrays) {
-            console.log('Make Array')
             if (collection.arrays.includes(text) === false) {
               collection.arrays.push(text)
             }
@@ -34,14 +32,12 @@ function dragEnd (dropX, dropY, text, isId) {
       }
       // Dropping ON _id to replace it
       if (app.flags.custom_id && idY < dropY < idY + fieldHeight && dropX > idX - 20 && dropX < idX + 80) {
-        console.log('On')
         if (collection.fields.includes(text) === false) {
           collection.fields[0] = text
         }
       }
     }
   }
-  console.log(JSON.stringify(app.collections, null, 2))
 }
 // eslint-disable-next-line no-unused-vars
 function browserDragStart (ev) {
@@ -68,11 +64,10 @@ function browserDragEnd (ev) {
   dropX = dropX - boardRect.left
   dropY = dropY - boardRect.top
 
-  console.log(dropX, dropY, boardRect)
   if (dropX < 1 || dropX > boardRect.width - elWidth) {
     return
   }
-  console.log(ev.target)
+
   const isId = (ev.target.textContent === app.fields[0])
   // Shift relative to parent
 
@@ -84,12 +79,10 @@ function mobileDragStart (ev) {
   app.selectedIndex = null
   // Use draggable to determine if we do this
   if (ev.target.draggable === false) return
-  console.log('start')
+
   // We need to show something being dragged
   // So we add the new element we will ultimately have
   const text = ev.target.textContent
-  // tempElement = newElement(ev.target.offsetLeft, ev.target.offsetTop, text, false, false)
-  // console.log(tempElement)
 
   const touchLocation = ev.targetTouches[0]
 
