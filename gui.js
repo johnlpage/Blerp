@@ -73,7 +73,6 @@ async function testSchema () {
       if (testOutcome.performance > 0) {
         // Show the performance
         // eslint-disable-next-line no-undef
-        testOutcome.vrange = test.vrange ? test.vrange : 12000
         testOutcome.desc = test.desc
         await new Promise((resolve) => { simulateOp(testOutcome, resolve) }) /* global simulateOp */
         // And fail if we have to

@@ -10,7 +10,10 @@ const nPoints = 100
 function tickv () {
   if (Math.random() < 0.05) {
     app.simulator.cpu = Math.floor(app.simulator.opdesc.cpu * (0.95 + Math.random() * 0.1))
+    if (app.simulator.cpu > 100) app.simulator.cpu = 100
     app.simulator.disk = Math.floor(app.simulator.opdesc.iops * (0.95 + Math.random() * 0.1))
+    if (app.simulator.disk > 100) app.simulator.disk = 100
+
     app.simulator.ops = Math.floor(app.simulator.opdesc.performance * (0.95 + Math.random() * 0.1))
   }
 

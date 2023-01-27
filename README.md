@@ -13,6 +13,12 @@ all Orders for a Customer where that may not be 1:1 with documents if using Join
 
 TODO List
 ----------
+
+Correct use of Limit
+Calculating for answer using arrays
+Writing
+Cache impact
+
 ~~Rewrite HTML/Render uing Vue.js (Shoudl have done that to start with)~~
 ~~Add 'Feature Enablement' flags~~
 ~~Fix 'Mobile Ratio' on browser~~

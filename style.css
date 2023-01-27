@@ -250,7 +250,7 @@ body {
 
 .labels {
     font-size: min(2.5vh, 32pt);
-    color: white;
+   
     z-index: 10;
 }
 
@@ -262,6 +262,7 @@ body {
 .label {
     margin-right: 1em;
     float: left;
+    color: white;
 }
 
 .value {

@@ -3,9 +3,8 @@ function tutorialLevels (levelList) {
   const tutorialone = {
     _id: 'tutorial_1',
     intro: [{
-      msg: `In this game you construct MongoDB schemas to meet business needs.<p>
-        First we will just walk through the controls so you can see how to build things.
-        You are presented with a set of fields you can drag into collections.<p> Every collection has a field called _id
+      msg: `In this game you construct MongoDB schemas to meet performance targets.<p>
+        You are presented with a set of fields you can drag into groups called collections.<p> Every collection has a field called _id
         which is the unique identifier `
     }, { msg: 'By default MongoDB will set the value of the _id field as an instance of an ObjectId. This an auto-generated globally unique value.' },
     { msg: 'Drag the _id field to the space below then click Test Schema to make your first collection' }],
@@ -69,24 +68,29 @@ function testLevels (levelList) {
   const beginner1 = {
     _id: 'beginner_1',
     intro: [{
-      msg: `OK, we are ready for out first real challenge, let\'s start with something simple
-     - we need to be able to fetch our customers details by CustomerId. We have tens of thousands of customers.`
+      msg: 'OK, we are ready for out first real challenge. We need to be able to fetch CustomerDetails using CustomerId. We have approximately 100,000 customers.'
     },
     {
-      msg: `The business estimates we need to fetch 2000 records per second at peak, and we are running on an 
-     Atlas M10 hosted instance - which has 1 CPU , 2GB RAM and a reasonably fast disk. `
+      msg: 'The business estimates we need to fetch 1200 records per second at peak. Our server has 1 CPU and the data is small enough to fit in RAM. '
     }],
     fields: ['_id: ObjectId()', 'CustomerId', 'CustomerDetails'],
-    tests: [{ op: 'find', query: { CustomerId: 1 }, limit: 1, project: { CustomerDetails: 1, CustomerId: 1 }, target: 2000, vrange: 5000 }],
+    tests: [{
+      desc: 'Fetch CustomerDetails by CustomerID',
+      op: 'find',
+      query: { CustomerId: 1 },
+      limit: 1,
+      project: { CustomerDetails: 1, CustomerId: 1 },
+      target: 1200
+    }],
     congrats: "Well done, by putting the CustomerId in the _id field it's much faster to retrieve as that has an index."
   }
   levelList.push(beginner1)
 
   const indexdev = {
     _id: 'indexdev',
-    intro: [{ msg: 'Now we have new requirement, we need to be able to get Customer Details by CustomerId but also by their Phone number.' },
-      { msg: 'We could have two collections and the customer details in both using different values for _id but then we would be storing all the same data twice, which isn\'t sensible.' },
-      { msg: 'What we can do is create an additional index on the phone number field, this will make writing a little slower but reading much much faster.' },
+    intro: [{ msg: 'Now we need to be able to get CustomerDetails by CustomerId but also by their Phone number.' },
+      { msg: 'We could have two collections and the customer details in both using different values for _id but storing the same data twice is wasteful.' },
+      { msg: 'Create an additional index on the phone number field to make that fast to retrieve too.' },
       { msg: 'To add an index just click on the field once you have added it to a collection.' }
     ],
     fields: ['_id: ObjectId()', 'CustomerId', 'CustomerPhone', 'CustomerDetails'],
@@ -99,8 +103,7 @@ function testLevels (levelList) {
         CustomerDetails: 1,
         CustomerId: 1
       },
-      target: 2000,
-      vrange: 15000
+      target: 1200
     },
     {
       op: 'find',
@@ -112,8 +115,7 @@ function testLevels (levelList) {
         CustomerId: 1,
         CustomerPhone: 1
       },
-      target: 2000,
-      vrange: 15000
+      target: 1200
     }],
     congrats: 'Well done, by having an index on both CutomerId and CustomerPhone we can fetch data quickly.',
     flag: 'index'
@@ -122,24 +124,23 @@ function testLevels (levelList) {
 
   const compounddev = {
     _id: 'compoundindex',
-    intro: [{ msg: 'If you have multiple conditions in your query, you want an index that includes both of them this is called a compound index.' },
-      { msg: 'You can add fields to an existing index by clicking on the index, then the fied to add.' },
-      { msg: 'We\'ve decided we want to fetch CustomerDetails by City and State so create an index for that' },
-      { msg: 'Try to get it so we can fetch our customer details at 3,800 calls per second' }
+    intro: [{ msg: 'If you have multiple conditions in your query, you need an index that includes both of them. This is called a Compound Index.' },
+      { msg: 'You can add fields to an existing index by clicking on the index, then the fields to add.' },
+      { msg: 'We\'ve decided we want to fetch details of all customers  by City and State so create an index for that' },
+      { msg: 'Try to get it so we can fetch the list of customers at a rate of 500 calls per second' }
     ],
     fields: ['_id: ObjectId()', 'City', 'State', 'CustomerDetails'],
     tests: [{
       op: 'find',
       desc: 'Fetch Customer details by City and State',
       query: { City: 1, State: 1 },
-      limit: 1,
+      limit: 100,
       project: {
         CustomerDetails: 1
       },
-      target: 2000,
-      vrange: 5000,
-      flag: 'compound'
-    }]
+      target: 500
+    }],
+    flag: 'compound'
   }
 
   levelList.push(compounddev)
@@ -147,43 +148,39 @@ function testLevels (levelList) {
   const compoundindexmulti = {
     _id: 'compoundindexmulti',
 
-    intro: [{ msg: 'An index can only be used if the first field in the index is in the query. Create indexes so we can query by city, state or both.' }
-    ],
+    intro: [{ msg: 'An index can only be used if the first field in the index is in the query.' },
+      { msg: 'Create indexes so we can query by city, state or both at at least 500 per second.' }],
     fields: ['_id: ObjectId()', 'City', 'State', 'CustomerDetails'],
     tests: [{
       op: 'find',
       desc: 'Fetch Customer details by City and State',
       query: { City: 1, State: 1 },
-      limit: 1,
+      limit: 100,
       project: {
         CustomerDetails: 1
       },
-      target: 2000,
-      vrange: 5000,
+      target: 500,
       flag: 'compound'
     },
     {
       op: 'find',
       desc: 'Fetch Customer details  State',
       query: { State: 1 },
-      limit: 1,
+      limit: 100,
       project: {
         CustomerDetails: 1
       },
-      target: 2000,
-      vrange: 5000,
-      flag: 'compound'
+      target: 500
     },
     {
       op: 'find',
       desc: 'Fetch Customer details by City ',
       query: { City: 1 },
-      limit: 1,
+      limit: 100,
       project: {
         CustomerDetails: 1
       },
-      target: 2000,
-      vrange: 5000
+      target: 500
 
     }],
     flag: 'compound'
@@ -193,10 +190,9 @@ function testLevels (levelList) {
 
   const covered1 = {
     _id: 'covered1',
-    intro:[],
-    real_intro: [{ msg: 'If all the fields we need to retrieve are in the index as well as the ones we query on we have a  "covered" query which is much faster, put City, State and CustomerDetails into the index to see this' },
-      { msg: 'This can make your indexes very large though, requiring more RAM as we will see in the next set of levels' }
-
+    intro: [{ msg: 'If an index contains both the query fields and those we are retrieving then we can complete the operation without fetching the documents' },
+      { msg: 'This is called a Covered Query and can be considerably faster but can make your indexes larger needing more hardware ' },
+      { msg: 'Create a covering index to allow us to fetch CustomerDetails by City and State at over 700 ops per second' }
     ],
     fields: ['_id: ObjectId()', 'City', 'State', 'CustomerDetails'],
     cachesize: 100, /* Quantuty of available cache */
@@ -209,7 +205,7 @@ function testLevels (levelList) {
       project: {
         CustomerDetails: 1
       },
-      target: 10000 /* Required Speed */
+      target: 700 /* Required Speed */
     }]
   }
 
