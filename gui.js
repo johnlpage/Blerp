@@ -63,8 +63,8 @@ async function testSchema () {
   const { tests } = app.currentLevel
   for (const test of tests) {
     // eslint-disable-next-line no-undef
-    const testOutcome = perfTest(test, app.collections)
-   
+    const testOutcome = perfTest(test, app.collections, app.currentLevel)
+
     if (testOutcome.ok === false) {
       /* We cannot use this schema at all */
       messageBubble({ x: 5, y: 20, w: 90, h: 60, msg: testOutcome.msg }, () => {})

@@ -78,7 +78,6 @@ function testLevels (levelList) {
       desc: 'Fetch CustomerDetails by CustomerID',
       op: 'find',
       query: { CustomerId: 1 },
-      limit: 1,
       project: { CustomerDetails: 1, CustomerId: 1 },
       target: 1200
     }],
@@ -98,7 +97,6 @@ function testLevels (levelList) {
       op: 'find',
       desc: 'Fetch Customer details by Id',
       query: { CustomerId: 1 },
-      limit: 1,
       project: {
         CustomerDetails: 1,
         CustomerId: 1
@@ -109,7 +107,6 @@ function testLevels (levelList) {
       op: 'find',
       desc: 'Fetch Customer details by Phone no.',
       query: { CustomerPhone: 1 },
-      limit: 1,
       project: {
         CustomerDetails: 1,
         CustomerId: 1,
@@ -134,9 +131,8 @@ function testLevels (levelList) {
       op: 'find',
       desc: 'Fetch Customer details by City and State',
       query: { City: 1, State: 1 },
-      limit: 100,
       project: {
-        CustomerDetails: 1
+        CustomerDetails: 100
       },
       target: 500
     }],
@@ -155,7 +151,7 @@ function testLevels (levelList) {
       op: 'find',
       desc: 'Fetch Customer details by City and State',
       query: { City: 1, State: 1 },
-      limit: 100,
+
       project: {
         CustomerDetails: 1
       },
@@ -166,7 +162,7 @@ function testLevels (levelList) {
       op: 'find',
       desc: 'Fetch Customer details  State',
       query: { State: 1 },
-      limit: 100,
+
       project: {
         CustomerDetails: 1
       },
@@ -176,7 +172,7 @@ function testLevels (levelList) {
       op: 'find',
       desc: 'Fetch Customer details by City ',
       query: { City: 1 },
-      limit: 100,
+
       project: {
         CustomerDetails: 1
       },
@@ -201,15 +197,55 @@ function testLevels (levelList) {
       op: 'find',
       desc: 'Fetch Customer details by City and State',
       query: { City: 1, State: 1 },
-      limit: 101, /* How many to retrieve */
       project: {
-        CustomerDetails: 1
+        CustomerDetails: 101
       },
       target: 700 /* Required Speed */
     }]
   }
 
   levelList.push(covered1)
+
+  const arraytest1 = {
+    _id: 'arraytest1',
+    intro: [{ msg: 'Fetch all the orders for a given Customerid - target 1400 per second' }],
+    fields: ['_id: ObjectId()', 'CustomerId', 'OrderDetails'],
+    cachesize: 100, /* Quantuty of available cache */
+    ndocs: 100, /* Number of docs in working set */
+    tests: [{
+      op: 'find',
+      desc: 'Fetch Order Details by Custoemr Id',
+      query: { CustomerId: 1 },
+      project: { /* By using OrderDetails:30 we are saying each query has to fetch 30 vaules of this field on average */
+        CustomerId: 1, OrderDetails: 30
+      },
+      target: 1400 /* Required Speed */
+    }]
+  }
+
+  levelList.push(arraytest1)
+
+  const cachetest = {
+    _id: 'sizetest',
+    intro: [{msg: "Fetch the Details of a customer an all their orders by CustomerId"}],
+    fields: ['_id: ObjectId()', 'CustomerId', 'OrderDetails', 'CustomerDetails'],
+    keys: ['CustomerId'], /* Entity Keys */
+    fieldsizes: { OrderDetails: 2, CustomerDetails: 20 }, /* Used to define any fields larger than averare in avg units , i.e. most are 1 */
+    cardinalities: { CustomerId: { OrderDetails: 30, CustomerDetails: 1 } }, /* Number of values of this per parent type */
+    cacheSize: 83, /* Quantity of available cache - units TBD */
+    workingSet: 100, /* %tage of DB docs in working set so if these dont fit in cachesize we take a hit on fetch */
+    tests: [{
+      op: 'find',
+      desc: 'Fetch Order Details by Custoemr Id',
+      query: { CustomerId: 1 },
+      project: { /* By using Phone:10 we are saying each query has to fetch 10 vaules of this field on average */
+        CustomerId: 1, OrderDetails: 30
+      },
+      target: 1400 /* Required Speed */
+    }]
+  }
+
+  levelList.push(cachetest)
 }
 
 // eslint-disable-next-line no-unused-vars

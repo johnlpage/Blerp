@@ -7,41 +7,95 @@
 /* This will relate to how much larger the working set is than the cache */
 /* It's prety naieve as it assumes all collections are used and all indexes are used */
 /* Being out of cache impacts writes as well as reads */
-const C_AVG_ARRAY_SIZE = 30
-const C_FIELD_SIZE = 1
-const C_DETAIL_FIELD_SIZE = 20
-const C_COLLECTION_SIZE = 100_000
 
+/** ***********
+ * Need to work out fixed cost overhead of a call to server
+ * Cost fo Index lookup versus retrieval of each match
+ * Cost fo FETCH relates to numebr fo records
+ * Make collection scam basically fixed
+ *
+ * *******************/
+
+const C_FIELD_SIZE = 1 /* Represents one field sized unit :-) */
+const C_COLLECTION_SIZE = 1_000_000 // TODO - Remove
 const explainPlan = []
 
-function calcDataSize (collections, constraints) {
-  let dataSize = 0
+function calcDataSize (collections, level) {
+  let totalDataSize = 0
+  let totalIdxSize = 0
   for (const c of collections) {
-    let colSize = 0
+    let collSize = 0
     let idxSize = 0
+    let docIdxSize = 1 // _id
+
+    let documentSize = 0
+    let firstField = true
+    let nDocs = 1
     for (const f of c.fields) {
-      let fsize = C_FIELD_SIZE /* 1 Standard Field */
-      if (f.includes('Details')) { fsize = C_DETAIL_FIELD_SIZE } /* A fieldname that is 'Details' is considered to be larger */
-      if (c.arrays.includes(f)) { fsize = fsize * C_AVG_ARRAY_SIZE }
-      colSize += fsize
-    }
-    dataSize += colSize
-    // Work out the index size
-    for (const i of c.indexes) {
-      for (const f of i) {
-        let fsize = C_FIELD_SIZE /* 1 Standard Field in index */
-        if (f.includes('Details')) { fsize = C_DETAIL_FIELD_SIZE }
-        if (c.arrays.includes(f)) { fsize = fsize * C_AVG_ARRAY_SIZE }
-        idxSize += fsize
+      console.log(f)
+      let fieldSize = C_FIELD_SIZE /* 1 Standard Field */
+
+      if (level.fieldsizes && level.fieldsizes[f] > 1) {
+        fieldSize = fieldSize * level.fieldsizes[f] // Larger than average fields
+        console.log(`Larger field ${fieldSize} units`)
       }
-      dataSize += idxSize
+
+      /* IF the field isn't a Key we need to work out if it's in here and how many records
+         or array elements that makes */
+      let nullField = false
+      if (level.keys.includes(f) === false && !firstField) {
+        console.log(`Checking if we can include ${f}`)
+        nullField = true
+        for (const k of level.keys) {
+          if (c.fields.includes(k)) {
+          // Can we include this field in here at all?
+          // Only if it has a relationship to a key that is here
+            console.log(`Seing if it's supported by ${k}`)
+            const cardinality = level.cardinalities[k][f]
+            if (cardinality > 0) {
+              nullField = false
+              console.log(`Record contains ${k} so ${cardinality} values for ${f} (ave)`)
+              if (c.arrays.includes(f)) {
+                console.log('It\'s an array - so multiplying field size')
+                fieldSize = fieldSize * cardinality
+              } else {
+              // Not an Array so more documents
+              // Simple but weird option we need to have docs for all combinations so we multiply up the doc multiplyer
+              // So if a person has 3 phone numbers and 5 orders and we add both as single fields
+              // We end up with 15 records - which si horrible but needed
+                nDocs = nDocs * cardinality
+              }
+            }
+          }
+        }
+      }
+      firstField = false
+      if (!nullField) {
+        documentSize += fieldSize
+        // Add fieldSize to Index SIze for all the indexes it's in
+        for (const index of c.indexes) {
+          for (const idxfield of index) {
+            if (idxfield === f) {
+              docIdxSize = docIdxSize + fieldSize
+            }
+          }
+        }
+      } else {
+        console.log('Nope!')
+      }
     }
+    // Now work out the collection size
+    console.log(`Each Key is ${nDocs} documents at ${documentSize} units `)
+    console.log(`Indexes ${docIdxSize} units `)
+    collSize = documentSize * nDocs
+    idxSize = docIdxSize * nDocs
+
+    logExplain(`Collection ${c.fields} size ${collSize} indexes ${idxSize} `)
+    totalDataSize += collSize
+    totalIdxSize += idxSize
   }
-  logExplain(`Calculated Data Size Per Doc ${dataSize}`)
-  const collSize = dataSize * C_COLLECTION_SIZE
-  logExplain(`Calculated Data Size Total ${collSize}`)
-  /* A fieldname that is 'Details' is considered to be larger */
-  return { dataSize, collSize }
+  console.log({ totalDataSize, totalIdxSize })
+  return { totalDataSize, totalIdxSize }
 }
 
 function logExplain (msg) {
@@ -49,30 +103,51 @@ function logExplain (msg) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function perfTest (op, collections, constraints) {
+function perfTest (op, collections, level) {
   // console.log('Testing performance')
   // console.log(JSON.stringify(op))
 
   let opResult
   explainPlan.length = 0
 
+  // This Checks for a specific answer - used in tutorials
   if (op.op === 'exact') {
-    return exactTest(op, collections, constraints)
+    return exactTest(op, collections)
   }
 
-  const dataSize = calcDataSize(collections)
+  let { totalDataSize, totalIdxSize } = calcDataSize(collections, level)
+  // Compute what percentage of cache misses we will have
 
-  if (op.op === 'find') {
-    logExplain(op)
-    opResult = findPerfTest(op, collections, constraints)
-    logExplain(opResult)
-    if (opResult.possible === false) {
-      return { msg: 'It\'s not possible to perform the operations with that schema', ok: false }
+  if (level.workingSet) {
+    totalDataSize = (totalDataSize * level.workingSet) / 100
+  }
+
+  const workingDataSize = totalIdxSize + totalDataSize
+  console.log(`Full working set is ${workingDataSize}`)
+  let cacheMissRatio = 1
+
+  if (level.cacheSize !== undefined) {
+    console.log(`Cache size is ${level.cacheSize}`)
+    if (workingDataSize > level.cacheSize) {
+      cacheMissRatio = workingDataSize / level.cacheSize
+      console.log(`Cache Miss Ratio ${cacheMissRatio}`)
+    } else {
+      console.log('Working set all fits in Cache')
     }
-  } else {
+  }
+  if (level) {
+    if (op.op === 'find') {
+      logExplain(op)
+      opResult = findPerfTest(op, collections, { cacheMissRatio ,level })
+      logExplain(opResult)
+      if (opResult.possible === false) {
+        return { msg: 'It\'s not possible to perform the operations with that schema', ok: false }
+      }
+    } else {
     // TODO - Add Update/Insert Speed tests
 
-    return { msg: `Operations type ${op.op} is not supported`, ok: false }
+      return { msg: `Operations type ${op.op} is not supported`, ok: false }
+    }
   }
   console.log(explainPlan.join('\n'))
   return opResult
@@ -120,14 +195,19 @@ function termsInIndex (queryFields, indexFields) {
   return { indexPrefix, indexedFields }
 }
 
+// What is the cost of writing a document
+// This one is super complicated as we may need to update a single document
+// Or multiple documents also any indexes
+
+function writePerfTest(op,collections,constraints)
+{
+
+}
 
 function findPerfTest (op, collections, constraints) {
   // To do this we need to be able to query by the query fields and fetch the project fields
   // They don't all need to be in the same collection - as long as there is a way to join them
   // A join will hurt though especially if not indexed
-
-  let limit = 1 /* By default we fectch a single document */
-  if (op.limit > 0) { limit = op.limit }
 
   const queryFields = Object.keys(op.query) /* For now assuming exact match */
   const projectFields = Object.keys(op.project)
@@ -149,7 +229,7 @@ function findPerfTest (op, collections, constraints) {
 
     if (arrayContainsSet(cFields, requiredFields)) {
       // console.log('Collection has all required fields')
-      const fetchCost = testFetchSpeed(collection, queryFields, projectFields, limit, constraints)
+      const fetchCost = testFetchSpeed(collection, queryFields, projectFields, op, constraints)
       logExplain(`With ${collection.fields} - performance is ${fetchCost.cost}`)
       if (fetchCost.cost < bestPerf.cost) {
         bestPerf = fetchCost
@@ -164,7 +244,6 @@ function findPerfTest (op, collections, constraints) {
   return { possible: true, performance: Math.ceil(C_OPS_PERCPU / bestPerf.cost), target: op.target, cpu: bestPerf.cpu, ram: bestPerf.ram, iops: bestPerf.iops }
 }
 
-
 // MEasuting on a single CPU M10 with 100,000 docs and fetching 300
 // Colscan = 21 ops/s (100,000 doc reads) - 2.1M Reads/s
 // Partial Index (10% cardinality) = 150 ops/s ( 6000 index reads + 6000 doc reads)  2.1M reads/s
@@ -173,18 +252,17 @@ function findPerfTest (op, collections, constraints) {
 
 // From RAM - index and doc read cost is same
 
-
-
-
 const C_OPS_PERCPU = 600000 /* Typical number of opsCost points a single CPU can do */
 const C_MEM_INDEXFETCH = 4 /* 1 Time unit to fetch from an index entry in memory */
 const C_MEM_DOCFETCH = 2 /* Time to fetch a document from cache */
 const C_MEM_COLLSCAN_BONUS = 4.5 /* Need to incorporate DB size, assume 10000 for */
 const C_INDEX_CARDINALITY = 7 /* { a:1, b:1 } - ave number of b per value of a */
 const C_FIXED_CALL_COSTS = 400
+const C_CACHE_MISS_FETCH_COST = 40
+
 /* Here we have a collection that contains all the fields we need - how fast can we fetch from it */
 
-function testFetchSpeed (collection, queryFields, projectFields, limit, constraints) {
+function testFetchSpeed (collection, queryFields, projectFields, op, constraints) {
   /* Things we will compute */
   let cpu = 5
   let ram = 5
@@ -197,6 +275,16 @@ function testFetchSpeed (collection, queryFields, projectFields, limit, constrai
 
   for (const index of collection.indexes) {
     availableIndexes.push(index)
+  }
+
+  //  Now we need to multiply by how many records we need to get the
+  // Projection fields and if >1 and not array set multiplier
+  let numRecsRequiredForResult = 1
+  for (const pf in op.project) {
+    if (op.project[pf] > numRecsRequiredForResult &&
+          collection.arrays.includes(pf) === false) {
+      numRecsRequiredForResult = op.project[pf]
+    }
   }
 
   const nQueryFields = queryFields.length
@@ -246,30 +334,42 @@ function testFetchSpeed (collection, queryFields, projectFields, limit, constrai
       }
     }
 
-    // TODO - Calculate Cache Size, Data Size, Working Set and therefor probability of a cache miss
-    // From that we can slow by a %tage
+    // How does fetch efficieny suffer with cache misses - if we have a cache miss ration of 5
+    // we add on 5-1 Xthe read overhead cost
+    fetchEfficiency = fetchEfficiency + ((constraints.cacheMissRatio - 1) * C_CACHE_MISS_FETCH_COST)
 
     if (indexEfficiency > 0) {
       // We use an Index
       // 'efficiency' Index Lookup per Document (Multiplied by number of docs we are fetching)
-      costPerOp = C_MEM_INDEXFETCH * limit * indexEfficiency
+      costPerOp = C_MEM_INDEXFETCH * numRecsRequiredForResult * indexEfficiency
 
       if (!covered) {
         // console.log('Query is indexed but not covered')
-        costPerOp += C_MEM_DOCFETCH * limit * fetchEfficiency
+
+        costPerOp += C_MEM_DOCFETCH * numRecsRequiredForResult * fetchEfficiency
       } else {
         logExplain('Index covers Query - no doc reads')
       }
-      // TODO - Compute these
+      // TODO - Tune these
       cpu = 80
       iops = 2
       ram = 10
+
+      if (constraints.cacheMissRatio > 1) {
+        iops = 30 * constraints.cacheMissRatio // Read into cache costs
+        if (iops > 99) iops = 99
+        ram = 100 // Cache full
+      }
     } else {
       /* No index == collection scan , assume 100% disk based too */
 
+      // Collection scan will hurt and working set won't count
       cpu = 99
-      iops = 2 //Change when not in cache
-      ram = 20
+      iops = 99 // Change if whole DB in cache?
+      if (constraints.cacheMissRatio === 1 && constraints.level.workingSet === 100) {
+        iops = 2
+      }
+      ram = 99
 
       logExplain('No Index matched  Query - Collection Scan')
       // A collection scan will scan only what it needs
@@ -278,15 +378,17 @@ function testFetchSpeed (collection, queryFields, projectFields, limit, constrai
       // 100 will scan the whole DB - either way its' slow
 
       // We should also correct for the fact we correct for limit later
-      //Linear scan is a little more effieicnt than random fetches.
-      costPerOp = (C_COLLECTION_SIZE * C_MEM_DOCFETCH ) / C_MEM_COLLSCAN_BONUS
-      if (limit === 1) {
+      // Linear scan is a little more effieicnt than random fetches.
+      costPerOp = (C_COLLECTION_SIZE * C_MEM_DOCFETCH) / C_MEM_COLLSCAN_BONUS
+
+      if (numRecsRequiredForResult === 1) {
         costPerOp = costPerOp / 2 // If its unique scan only half on average
       }
 
       // TODO - Make this 100% disk use and high CPU
     }
     // console.log(costPerOp)
+
     // If it's less than we have partial indexing˘
     if (costPerOp <= bestCostPerOp) {
       bestCostPerOp = costPerOp
@@ -298,8 +400,8 @@ function testFetchSpeed (collection, queryFields, projectFields, limit, constrai
   // Especially if we ignore network latency
   // Going to go with log10(n) - 10x twice as long 100x 3x as long
   logExplain(`costperop ${bestCostPerOp}`)
-  //bestCostPerOp = Math.floor((bestCostPerOp / limit) * Math.log10(limit))
-  //logExplain(`limit multiplier applied  ${bestCostPerOp}`)
+  // bestCostPerOp = Math.floor((bestCostPerOp / limit) * Math.log10(limit))
+  // logExplain(`limit multiplier applied  ${bestCostPerOp}`)
 
   bestCostPerOp += C_FIXED_CALL_COSTS
   return { cost: bestCostPerOp, cpu, ram, iops }
