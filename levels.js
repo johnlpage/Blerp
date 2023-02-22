@@ -227,7 +227,7 @@ function testLevels (levelList) {
 
   const cachetest = {
     _id: 'sizetest',
-    intro: [{msg: "Fetch the Details of a customer an all their orders by CustomerId"}],
+    intro: [{ msg: 'Fetch the Details of a customer and all their orders by CustomerId' }],
     fields: ['_id: ObjectId()', 'CustomerId', 'OrderDetails', 'CustomerDetails'],
     keys: ['CustomerId'], /* Entity Keys */
     fieldsizes: { OrderDetails: 2, CustomerDetails: 20 }, /* Used to define any fields larger than averare in avg units , i.e. most are 1 */
@@ -246,6 +246,26 @@ function testLevels (levelList) {
   }
 
   levelList.push(cachetest)
+
+  const writetest = {
+    _id: 'writetest',
+    intro: [{msg: "Add a new Customer to the database with their first order"}],
+    outro: [],
+    fields: ['_id: ObjectId()', 'CustomerId', 'OrderDetails', 'CustomerDetails'],
+    keys: ['CustomerId'], /* Entity Keys */
+    fieldsizes: { OrderDetails: 2, CustomerDetails: 20 }, /* Used to define any fields larger than averare in avg units , i.e. most are 1 */
+    cardinalities: { CustomerId: { OrderDetails: 30, CustomerDetails: 1 } }, /* Number of values of this per parent type */
+    cacheSize: 83, /* Quantity of available cache - units TBD */
+    workingSet: 100, /* %tage of DB docs in working set so if these dont fit in cachesize we take a hit on fetch */
+    tests: [{
+      op: 'insert',
+      desc: 'Add a new customer with first order',
+      fields: { CustomerId: 1, CustomerDetails: 1, OrderDetails: 1 },
+      target: 1400 /* Required Speed */
+    }]
+  }
+
+  levelList.push(writetest)
 }
 
 // eslint-disable-next-line no-unused-vars
