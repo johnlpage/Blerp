@@ -247,15 +247,15 @@ function testLevels (levelList) {
 
   levelList.push(cachetest)
 
-  const writetest = {
-    _id: 'writetest',
-    intro: [{msg: "Add a new Customer to the database with their first order"}],
+  const inserttest = {
+    _id: 'inserttest',
+    intro: [{ msg: 'Add a new customer with their first order' }],
     outro: [],
     fields: ['_id: ObjectId()', 'CustomerId', 'OrderDetails', 'CustomerDetails'],
     keys: ['CustomerId'], /* Entity Keys */
     fieldsizes: { OrderDetails: 2, CustomerDetails: 20 }, /* Used to define any fields larger than averare in avg units , i.e. most are 1 */
     cardinalities: { CustomerId: { OrderDetails: 30, CustomerDetails: 1 } }, /* Number of values of this per parent type */
-    cacheSize: 83, /* Quantity of available cache - units TBD */
+    cacheSize: 83, /* Quantity of available cache per document - units TBD */
     workingSet: 100, /* %tage of DB docs in working set so if these dont fit in cachesize we take a hit on fetch */
     tests: [{
       op: 'insert',
@@ -265,7 +265,52 @@ function testLevels (levelList) {
     }]
   }
 
-  levelList.push(writetest)
+  levelList.push(inserttest)
+
+
+  const upserttest = {
+    _id: 'pushtest',
+    intro: [], // Add a new order to an edisting customer
+    outro: [],
+    fields: ['_id: ObjectId()', 'CustomerId', 'OrderDetails', 'CustomerDetails'],
+    keys: ['CustomerId'], /* Entity Keys */
+    fieldsizes: { OrderDetails: 5, CustomerDetails: 20 }, /* Used to define any fields larger than averare in avg units , i.e. most are 1 */
+    cardinalities: { CustomerId: { OrderDetails: 30, CustomerDetails: 1 } }, /* Number of values of this per parent type */
+    cacheSize: 83, /* Quantity of available cache per document - units TBD */
+    workingSet: 100, /* %tage of DB docs in working set so if these dont fit in cachesize we take a hit on fetch */
+    tests: [{
+      op: 'upsert', // READ upsert.js to see what this MEANS!
+      desc: 'Adding a new order to an existing customer',
+      query: { CustomerId: 1 },
+      fields: { OrderDetails: 1 },
+      target: 20000 /* Required Speed */
+    }]
+  }
+
+  levelList.push(upserttest)
+
+
+  const updatetest = {
+    _id: 'pushtest',
+    intro: [], // Add a new order to an edisting customer
+    outro: [],
+    fields: ['_id: ObjectId()', 'CustomerId', 'OrderDetails', 'CustomerDetails'],
+    keys: ['CustomerId'], /* Entity Keys */
+    fieldsizes: { OrderDetails: 5, CustomerDetails: 20 }, /* Used to define any fields larger than averare in avg units , i.e. most are 1 */
+    cardinalities: { CustomerId: { OrderDetails: 30, CustomerDetails: 1 } }, /* Number of values of this per parent type */
+    cacheSize: 83, /* Quantity of available cache per document - units TBD */
+    workingSet: 100, /* %tage of DB docs in working set so if these dont fit in cachesize we take a hit on fetch */
+    tests: [{
+      op: 'update', // READ update.js to see what this MEANS!
+      desc: 'Adding a new order to an existing customer',
+      query: { CustomerId: 1 },
+      fields: { OrderDetails: 1 },
+      target: 20000 /* Required Speed */
+    }]
+  }
+
+  levelList.push(updatetest)
+
 }
 
 // eslint-disable-next-line no-unused-vars

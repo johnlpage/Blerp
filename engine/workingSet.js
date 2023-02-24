@@ -13,31 +13,31 @@ function calcDataSize (collections, level) {
     let firstField = true
     let nDocs = 1
     for (const f of c.fields) {
-      console.log(f)
+      // console.log(f)
       let fieldSize = C_FIELD_SIZE /* 1 Standard Field */
 
       if (level.fieldsizes && level.fieldsizes[f] > 1) {
         fieldSize = fieldSize * level.fieldsizes[f] // Larger than average fields
-        console.log(`Larger field ${fieldSize} units`)
+        // console.log(`Larger field ${fieldSize} units`)
       }
 
       /* IF the field isn't a Key we need to work out if it's in here and how many records
            or array elements that makes */
       let nullField = false
       if (level.keys && level.keys.includes(f) === false && !firstField) {
-        console.log(`Checking if we can include ${f}`)
+        // console.log(`Checking if we can include ${f}`)
         nullField = true
         for (const k of level.keys) {
           if (c.fields.includes(k)) {
             // Can we include this field in here at all?
             // Only if it has a relationship to a key that is here
-            console.log(`Seing if it's supported by ${k}`)
+            // console.log(`Seing if it's supported by ${k}`)
             const cardinality = level.cardinalities[k][f]
             if (cardinality > 0) {
               nullField = false
-              console.log(`Record contains ${k} so ${cardinality} values for ${f} (ave)`)
+              // console.log(`Record contains ${k} so ${cardinality} values for ${f} (ave)`)
               if (c.arrays.includes(f)) {
-                console.log('It\'s an array - so multiplying field size')
+                // console.log('It\'s an array - so multiplying field size')
                 fieldSize = fieldSize * cardinality
               } else {
                 // Not an Array so more documents
@@ -62,12 +62,12 @@ function calcDataSize (collections, level) {
           }
         }
       } else {
-        console.log('Nope!')
+        // console.log('Nope!')
       }
     }
     // Now work out the collection size
-    console.log(`Each Key is ${nDocs} documents at ${documentSize} units `)
-    console.log(`Indexes ${docIdxSize} units `)
+    // console.log(`Each Key is ${nDocs} documents at ${documentSize} units `)
+    // console.log(`Indexes ${docIdxSize} units `)
     collSize = documentSize * nDocs
     idxSize = docIdxSize * nDocs
 
@@ -75,6 +75,6 @@ function calcDataSize (collections, level) {
     totalDataSize += collSize
     totalIdxSize += idxSize
   }
-  console.log({ totalDataSize, totalIdxSize })
+  // console.log({ totalDataSize, totalIdxSize })
   return { totalDataSize, totalIdxSize }
 }

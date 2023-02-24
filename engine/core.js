@@ -16,7 +16,7 @@
  *
  * *******************/
 
-/* global calcDataSize, explainPlan, exactTest, logExplain, findPerfTest */
+/* global calcDataSize, explainPlan, exactTest, logExplain, findPerfTest, insertPerfTest, upsertPerfTest */
 
 // eslint-disable-next-line no-unused-vars
 function perfTest (op, collections, level) {
@@ -39,11 +39,11 @@ function perfTest (op, collections, level) {
   }
 
   const workingDataSize = totalIdxSize + totalDataSize
-  console.log(`Full working set is ${workingDataSize}`)
+  console.log(`Full working set is ${workingDataSize} units per record`)
   let cacheMissRatio = 1
 
   if (level.cacheSize !== undefined) {
-    console.log(`Cache size is ${level.cacheSize}`)
+    console.log(`Cache size is ${level.cacheSize} units per record`)
     if (workingDataSize > level.cacheSize) {
       cacheMissRatio = workingDataSize / level.cacheSize
       console.log(`Cache Miss Ratio ${cacheMissRatio}`)
@@ -57,34 +57,47 @@ function perfTest (op, collections, level) {
       opResult = findPerfTest(op, collections, { cacheMissRatio, level })
       logExplain(opResult)
       if (opResult.possible === false) {
+        // TODO - Bubble up why
         return { msg: 'It\'s not possible to perform the operations with that schema', ok: false }
       }
+    } else if (op.op === 'insert') {
+      logExplain(op)
+      opResult = insertPerfTest(op, collections, { cacheMissRatio, level })
+      logExplain(opResult)
+      if (opResult.possible === false) {
+        if (opResult.msg) {
+          return { msg: opResult.msg, ok: false }
+        } else {
+          return { msg: 'It\'s not possible to perform the operations with that schema', ok: false }
+        }
+      }
+    } else if (op.op === 'upsert') {
+      logExplain(op)
+      opResult = upsertPerfTest(op, collections, { cacheMissRatio, level })
+      logExplain(opResult)
+      if (opResult.possible === false) {
+        if (opResult.msg) {
+          return { msg: opResult.msg, ok: false }
+        } else {
+          return { msg: 'It\'s not possible to perform the operations with that schema', ok: false }
+        }
+      }
+    }
+    else if (op.op === 'update') {
+      logExplain(op)
+      opResult = upsertPerfTest(op, collections, { cacheMissRatio, level })
+      logExplain(opResult)
+      if (opResult.possible === false) {
+        if (opResult.msg) {
+          return { msg: opResult.msg, ok: false }
+        } else {
+          return { msg: 'It\'s not possible to perform the operations with that schema', ok: false }
+        }
+      }
     } else {
-    // TODO - Add Update/Insert Speed tests
-
       return { msg: `Operations type ${op.op} is not supported`, ok: false }
     }
   }
   console.log(explainPlan.join('\n'))
   return opResult
-}
-
-// What is the cost of writing a document
-// This one is super complicated as we may need to update a single document
-// Or multiple documents also any indexes
-
-// Cost will be For every collection that contains these fields
-// One write op and one write op per index
-// Assume no read costs as _id at lest we will imagine to be in RAM
-// eslint-disable-next-line no-unused-vars
-function insertPerfTest (op, collections, constraints) {
-
-}
-
-// Treat as cost of a find and a write cost for each record found
-// Treating writing a large and small doc the same - not strictly ture but OK it not huge
-
-// eslint-disable-next-line no-unused-vars
-function updatePerfTest () {
-
 }
